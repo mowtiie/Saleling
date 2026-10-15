@@ -95,7 +95,7 @@ The following packages must be installed in your project to handle configuration
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/eipna/Group08_BT3103.git](https://github.com/eipna/Group08_BT3103.git)
+    git clone https://github.com/mowtiie/Saleling
     ```
 2.  **Database Configuration:**
     * Publish your local SQL Server database schema.
