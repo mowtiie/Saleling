@@ -67,7 +67,6 @@ namespace Saleling.Controller
             {
                 throw new Exception("Quantity change must be greater than zero");
             }
-            ;
 
             await _inventoryRepository.LogTransactionAsync(logTransaction);
         }
@@ -139,7 +138,7 @@ namespace Saleling.Controller
             InventoryMovementKPIModel? movementKPI = await _inventoryRepository.GetMovementKPIsAsync(startDate, endDate);
             if (movementKPI == null)
             {
-                throw new InvalidOperationException("An error occured when retrieving the inventory movement report KPIs"); ;
+                throw new InvalidOperationException("An error occurred when retrieving the inventory movement report KPIs");
             }
             else
             {
@@ -153,7 +152,7 @@ namespace Saleling.Controller
             InventoryStockKPIModel? stockKPI = await _inventoryRepository.GetStockKPIsAsync();
             if (stockKPI == null)
             {
-                throw new InvalidOperationException("n error occured when retrieving the inventory stock report KPIs");
+                throw new InvalidOperationException("An error occurred when retrieving the inventory stock report KPIs");
             }
             else
             {

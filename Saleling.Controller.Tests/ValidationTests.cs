@@ -74,10 +74,10 @@ namespace Saleling.Controller.Tests
         }
 
         [Fact]
-        public async Task AddProductVariantAsync_ZeroReorderLevel_Throws()
+        public async Task AddProductVariantAsync_NegativeReorderLevel_Throws()
         {
             ProductVariantModel variant = TestData.Variant();
-            variant.ReorderLevel = 0;
+            variant.ReorderLevel = -1;
 
             await Assert.ThrowsAsync<Exception>(() => _controller.AddProductVariantAsync(variant, 1));
         }
@@ -110,6 +110,17 @@ namespace Saleling.Controller.Tests
             variant.VariantID = 0;
 
             await Assert.ThrowsAsync<Exception>(() => _controller.EditProductVariantAsync(variant));
+        }
+
+        [Fact]
+        public async Task EditProductVariantAsync_NegativeReorderLevel_Throws()
+        {
+            ProductVariantModel variant = TestData.Variant();
+            variant.ReorderLevel = -1;
+
+            Exception ex = await Assert.ThrowsAsync<Exception>(() => _controller.EditProductVariantAsync(variant));
+
+            Assert.Equal("Reorder level must not be less than zero", ex.Message);
         }
 
         [Theory]

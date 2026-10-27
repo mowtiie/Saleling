@@ -55,7 +55,7 @@ namespace Saleling.UI
                 dgvTransactionReport.Columns["Cashier"].Visible = false;
 
                 lblSales.Text = salesTask.Result.ToString("C2");
-                lblTransactions.Text = $"{transactionCountTask.Result} transactions";
+                lblTransactions.Text = PluralUtil.Count(transactionCountTask.Result, "transaction", "transactions");
                 lblItemsSold.Text = itemsSoldCountTask.Result.ToString();
                 lblAveragePerTransaction.Text = $"Average: {avgPerTransactionTask.Result:F2} per transaction";
                 lblLowStock.Text = lowStockCountTask.Result.ToString();

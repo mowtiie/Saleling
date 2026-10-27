@@ -20,12 +20,12 @@ namespace Saleling.Controller.Tests
             return (await _db.SeedUserAsync(), await _db.SeedCustomerAsync());
         }
 
-        private static SalesTransactionModel Sale(int userId, int customerId, params SalesItemModel[] items) =>
+        private static SalesTransactionModel Sale(int userId, int customerId, decimal expectedTotal, params SalesItemModel[] items) =>
             new SalesTransactionModel
             {
                 CustomerID = customerId,
                 ProcessedByUserID = userId,
-                TotalAmount = 0.01m,
+                TotalAmount = expectedTotal,
                 Items = items.ToList()
             };
 
@@ -36,12 +36,12 @@ namespace Saleling.Controller.Tests
             new SalesRepository(_db.ConnectionString).ProcessSaleAsync(sale);
 
         [ScratchDbFact]
-        public async Task Sale_UsesServerPricesNotClientValues()
+        public async Task Sale_IgnoresClientUnitPriceAndSubTotal()
         {
             (int userId, int customerId) = await SeedAsync();
             int variantId = await _db.SeedVariantAsync(sellingPrice: 100m, stock: 10);
 
-            int saleId = await ProcessAsync(Sale(userId, customerId, Item(variantId, 3, discount: 20m)));
+            int saleId = await ProcessAsync(Sale(userId, customerId, 280m, Item(variantId, 3, discount: 20m)));
 
             Assert.Equal(280m, await _db.ScalarAsync<decimal>("SELECT TotalAmount FROM Sales WHERE SaleID = @Id", ("@Id", saleId)));
             Assert.Equal(100m, await _db.ScalarAsync<decimal>("SELECT UnitPrice FROM SalesItems WHERE SaleID = @Id", ("@Id", saleId)));
@@ -50,12 +50,28 @@ namespace Saleling.Controller.Tests
         }
 
         [ScratchDbFact]
+        public async Task Sale_TotalThatDoesNotMatchCurrentPrices_IsRejectedAndChangesNothing()
+        {
+            (int userId, int customerId) = await SeedAsync();
+            int variantId = await _db.SeedVariantAsync(sellingPrice: 100m, stock: 10);
+
+            // The cashier was shown 90.00, but the variant now costs 100.00 (or the client lied).
+            SqlException ex = await Assert.ThrowsAsync<SqlException>(
+                () => ProcessAsync(Sale(userId, customerId, 90m, Item(variantId, 1))));
+
+            Assert.Contains("no longer matches current prices", ex.Message);
+            Assert.Equal(10, await _db.StockAsync(variantId));
+            Assert.Equal(0, await _db.CountAsync("Sales"));
+            Assert.Equal(0, await _db.CountAsync("Inventory"));
+        }
+
+        [ScratchDbFact]
         public async Task Sale_DecrementsStockAndLogsInventoryMovement()
         {
             (int userId, int customerId) = await SeedAsync();
             int variantId = await _db.SeedVariantAsync(stock: 10);
 
-            int saleId = await ProcessAsync(Sale(userId, customerId, Item(variantId, 3)));
+            int saleId = await ProcessAsync(Sale(userId, customerId, 300m, Item(variantId, 3)));
 
             Assert.Equal(7, await _db.StockAsync(variantId));
             Assert.Equal(-3, await _db.ScalarAsync<int>(
@@ -69,7 +85,7 @@ namespace Saleling.Controller.Tests
             (int userId, int customerId) = await SeedAsync();
             int variantId = await _db.SeedVariantAsync(stock: 2);
 
-            await ProcessAsync(Sale(userId, customerId, Item(variantId, 2)));
+            await ProcessAsync(Sale(userId, customerId, 200m, Item(variantId, 2)));
 
             Assert.Equal(0, await _db.StockAsync(variantId));
         }
@@ -81,7 +97,7 @@ namespace Saleling.Controller.Tests
             int shirt = await _db.SeedVariantAsync(sellingPrice: 100m, stock: 5);
             int socks = await _db.SeedVariantAsync(sellingPrice: 30m, stock: 5);
 
-            int saleId = await ProcessAsync(Sale(userId, customerId, Item(shirt, 2), Item(socks, 1)));
+            int saleId = await ProcessAsync(Sale(userId, customerId, 230m, Item(shirt, 2), Item(socks, 1)));
 
             Assert.Equal(230m, await _db.ScalarAsync<decimal>("SELECT TotalAmount FROM Sales WHERE SaleID = @Id", ("@Id", saleId)));
             Assert.Equal(2, await _db.CountAsync("SalesItems"));
@@ -93,7 +109,7 @@ namespace Saleling.Controller.Tests
             (int userId, int customerId) = await SeedAsync();
             int variantId = await _db.SeedVariantAsync(sellingPrice: 50m, stock: 5);
 
-            int saleId = await ProcessAsync(Sale(userId, customerId, Item(variantId, 2, discount: 500m)));
+            int saleId = await ProcessAsync(Sale(userId, customerId, 0m, Item(variantId, 2, discount: 500m)));
 
             Assert.Equal(100m, await _db.ScalarAsync<decimal>("SELECT Discount FROM SalesItems WHERE SaleID = @Id", ("@Id", saleId)));
             Assert.Equal(0m, await _db.ScalarAsync<decimal>("SELECT TotalAmount FROM Sales WHERE SaleID = @Id", ("@Id", saleId)));
@@ -106,7 +122,7 @@ namespace Saleling.Controller.Tests
             int variantId = await _db.SeedVariantAsync(stock: 2);
 
             SqlException ex = await Assert.ThrowsAsync<SqlException>(
-                () => ProcessAsync(Sale(userId, customerId, Item(variantId, 3))));
+                () => ProcessAsync(Sale(userId, customerId, 300m, Item(variantId, 3))));
 
             Assert.Contains("Insufficient stock", ex.Message);
             Assert.Equal(2, await _db.StockAsync(variantId));
@@ -123,7 +139,7 @@ namespace Saleling.Controller.Tests
             int scarce = await _db.SeedVariantAsync(stock: 1);
 
             await Assert.ThrowsAsync<SqlException>(
-                () => ProcessAsync(Sale(userId, customerId, Item(plentiful, 4), Item(scarce, 2))));
+                () => ProcessAsync(Sale(userId, customerId, 600m, Item(plentiful, 4), Item(scarce, 2))));
 
             Assert.Equal(10, await _db.StockAsync(plentiful));
             Assert.Equal(1, await _db.StockAsync(scarce));
@@ -136,7 +152,7 @@ namespace Saleling.Controller.Tests
             (int userId, int customerId) = await SeedAsync();
             int variantId = await _db.SeedVariantAsync(stock: 10, status: "Discontinued");
 
-            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, Item(variantId, 1))));
+            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, 100m, Item(variantId, 1))));
 
             Assert.Equal(10, await _db.StockAsync(variantId));
             Assert.Equal(0, await _db.CountAsync("Sales"));
@@ -147,7 +163,7 @@ namespace Saleling.Controller.Tests
         {
             (int userId, int customerId) = await SeedAsync();
 
-            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, Item(999999, 1))));
+            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, 100m, Item(999999, 1))));
 
             Assert.Equal(0, await _db.CountAsync("Sales"));
         }
@@ -157,7 +173,7 @@ namespace Saleling.Controller.Tests
         {
             (int userId, int customerId) = await SeedAsync();
 
-            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId)));
+            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, 0m)));
 
             Assert.Equal(0, await _db.CountAsync("Sales"));
         }
@@ -168,9 +184,9 @@ namespace Saleling.Controller.Tests
             (int userId, int customerId) = await SeedAsync();
             int variantId = await _db.SeedVariantAsync(stock: 10);
 
-            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, Item(variantId, 0))));
-            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, Item(variantId, -2))));
-            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, Item(variantId, 1, discount: -5m))));
+            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, 0m, Item(variantId, 0))));
+            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, 0m, Item(variantId, -2))));
+            await Assert.ThrowsAsync<SqlException>(() => ProcessAsync(Sale(userId, customerId, 0m, Item(variantId, 1, discount: -5m))));
 
             Assert.Equal(10, await _db.StockAsync(variantId));
             Assert.Equal(0, await _db.CountAsync("Sales"));
@@ -183,7 +199,7 @@ namespace Saleling.Controller.Tests
             int variantId = await _db.SeedVariantAsync(stock: 10);
 
             await Assert.ThrowsAsync<SqlException>(
-                () => ProcessAsync(Sale(userId, customerId, Item(variantId, 1), Item(variantId, 1))));
+                () => ProcessAsync(Sale(userId, customerId, 200m, Item(variantId, 1), Item(variantId, 1))));
 
             Assert.Equal(10, await _db.StockAsync(variantId));
         }

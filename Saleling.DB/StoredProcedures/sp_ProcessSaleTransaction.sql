@@ -10,8 +10,9 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
-    -- Prices, line totals and the sale total are recomputed from ProductVariants;
-    -- the client-supplied UnitPrice, SubTotal and @TotalAmount are not trusted.
+    -- Prices, line totals and the sale total are recomputed from ProductVariants.
+    -- The client-supplied UnitPrice and SubTotal are ignored. @TotalAmount is the total the
+    -- cashier was shown; the sale is rejected if current prices no longer add up to it.
     IF NOT EXISTS (SELECT 1 FROM @SaleItems)
     BEGIN
         RAISERROR('Sale failed: No items were provided.', 16, 1);
@@ -68,6 +69,11 @@ BEGIN
         END
 
         DECLARE @ComputedTotal DECIMAL(10, 2) = (SELECT SUM(SubTotal) FROM @Priced);
+
+        IF @ComputedTotal <> @TotalAmount
+        BEGIN
+            RAISERROR('Sale failed: The total no longer matches current prices. Please refresh the product list and try again.', 16, 1);
+        END
         DECLARE @NewSaleID INT;
 
         INSERT INTO Sales (CustomerID, ProcessedByUserID, TotalAmount)

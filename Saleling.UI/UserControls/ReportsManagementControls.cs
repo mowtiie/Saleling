@@ -266,7 +266,7 @@ namespace Saleling.UI
             {
                 lblLeftKPI.Text = salesKPI.TotalSalesRevenue.ToString("C2");
                 lblRightKPI.Text = salesKPI.AverageSaleValue.ToString("C2");
-                lblLeftSubKPI.Text = $"{salesKPI.TransactionCount.ToString("N0")} transactions";
+                lblLeftSubKPI.Text = PluralUtil.Count(salesKPI.TransactionCount, "transaction", "transactions");
                 lblMiddleKPI.Text = salesKPI.ItemsSoldCount.ToString("N0");
             }
             else if (_currentKPIModel is InventoryStockKPIModel stockKPI)
@@ -422,7 +422,7 @@ namespace Saleling.UI
                 if (_currentKPIModel is SalesReportKPIModel salesKPI)
                 {
                     kpiData.Add(("TOTAL SALES REVENUE", salesKPI.TotalSalesRevenue.ToString("C2"),
-                        $"{salesKPI.TransactionCount:N0} transactions"));
+                        PluralUtil.Count(salesKPI.TransactionCount, "transaction", "transactions")));
                     kpiData.Add(("TOTAL ITEMS SOLD", salesKPI.ItemsSoldCount.ToString("N0"), ""));
                     kpiData.Add(("AVERAGE SALE VALUE", salesKPI.AverageSaleValue.ToString("C2"), ""));
                 }

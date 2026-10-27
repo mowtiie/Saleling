@@ -3,6 +3,7 @@ using Saleling.Model.Product;
 using Saleling.Model.Sale;
 using Saleling.Repository;
 using Saleling.Util;
+using System.Data.SqlClient;
 using System.Xml.Linq;
 
 namespace Saleling.Controller
@@ -11,6 +12,9 @@ namespace Saleling.Controller
     {
         private readonly SalesRepository _salesRepository;
         private readonly ProductRepository _productRepository;
+
+        // Error number SQL Server gives RAISERROR(...) messages, which the stored procedures use for business rules.
+        private const int BusinessRuleErrorNumber = 50000;
 
         private readonly int _currentCashierID;
 
@@ -172,7 +176,17 @@ namespace Saleling.Controller
                 Items = itemDataModels
             };
 
-            int newSaleId = await _salesRepository.ProcessSaleAsync(transactionModel);
+            int newSaleId;
+            try
+            {
+                newSaleId = await _salesRepository.ProcessSaleAsync(transactionModel);
+            }
+            catch (SqlException ex) when (ex.Number == BusinessRuleErrorNumber)
+            {
+                // The sale procedure rejected the sale (stock ran out, prices changed, ...); the cart is kept.
+                throw new InvalidOperationException(ex.Message, ex);
+            }
+
             ClearCart();
 
             return newSaleId;
@@ -352,7 +366,7 @@ namespace Saleling.Controller
             SalesReportKPIModel? saleReportsKPI = await _salesRepository.GetSaleReportsKPIAsync(startDate, endDate, processedByUserID);
             if (saleReportsKPI == null)
             {
-                throw new Exception("An error occured when retrieving sale reports KPIs.");
+                throw new Exception("An error occurred when retrieving sale reports KPIs.");
             }
             else
             {

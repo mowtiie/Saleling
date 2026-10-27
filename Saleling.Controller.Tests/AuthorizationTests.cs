@@ -77,8 +77,7 @@ namespace Saleling.Controller.Tests
                 ("DeleteProductAsync", () => controller.DeleteProductAsync(1)),
                 ("AddProductVariantAsync", () => controller.AddProductVariantAsync(TestData.Variant(), 7)),
                 ("EditProductVariantAsync", () => controller.EditProductVariantAsync(TestData.Variant())),
-                ("DeleteProductVariantAsync", () => controller.DeleteProductVariantAsync(1)),
-                ("DeleteProductVariantID", () => controller.DeleteProductVariantID(1)));
+                ("DeleteProductVariantAsync", () => controller.DeleteProductVariantAsync(1)));
         }
 
         [Fact]

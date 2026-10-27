@@ -47,9 +47,9 @@ namespace Saleling.Controller
                 throw new Exception("Please enter a SKU for the product variant");
             }
 
-            if (productVariant.ReorderLevel <= 0)
+            if (productVariant.ReorderLevel < 0)
             {
-                throw new Exception("Reorder level must be greater than zero");
+                throw new Exception("Reorder level must not be less than zero");
             }
 
             if (productVariant.StockQuantity < 0)
@@ -156,17 +156,6 @@ namespace Saleling.Controller
             }
 
             return await _productRepository.GetProductVariantsByProductIDAsync(productID);
-        }
-
-        public async Task DeleteProductVariantID(int productVariantID)
-        {
-            SessionUtil.Instance.RequireRole(Roles.Admin);
-            if (productVariantID <= 0)
-            {
-                throw new Exception("Invalid Product Variant ID");
-            }
-
-            await _productRepository.DeleteProductVariantAsync(productVariantID);
         }
 
         public async Task DeleteProductAsync(int productID)

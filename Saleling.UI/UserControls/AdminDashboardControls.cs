@@ -63,9 +63,9 @@ namespace Saleling.UI
                 dgvTransactionReport.Columns["TotalAmount"].DefaultCellStyle.Format = "C2";
 
                 lblTodaySales.Text = totalSalesTask.Result.ToString("C2");
-                lblTransactionCount.Text = $"{transactionCountTask.Result.ToString()} transactions";
+                lblTransactionCount.Text = PluralUtil.Count(transactionCountTask.Result, "transaction", "transactions");
                 lblProductCount.Text = productCountTask.Result.ToString();
-                lblCategoryCount.Text = $"{categoryCountTask.Result.ToString()} categories";
+                lblCategoryCount.Text = PluralUtil.Count(categoryCountTask.Result, "category", "categories");
                 lblLowStockCount.Text = lowStockCountTask.Result.ToString();
                 lblOutOfStockCount.Text = $"{outOfStockCountTask.Result.ToString()} out of stock";
             }

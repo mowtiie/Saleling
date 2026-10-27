@@ -102,6 +102,30 @@ namespace Saleling.Controller.Tests
         }
 
         [ScratchDbFact]
+        public async Task Cashier_PriceChangeAfterAddingToCart_RejectsSaleAndKeepsCart()
+        {
+            await _db.ResetAsync();
+            int cashierId = await _db.SeedUserAsync("Cashier", "till1");
+            int customerId = await _db.SeedCustomerAsync();
+            int variantId = await _db.SeedVariantAsync(sellingPrice: 80m, stock: 10);
+            TestData.LoginAsCashier(cashierId);
+            SalesController controller = Controller();
+            controller.AddItemToCart((await controller.GetAvailableProductsAsync()).Single());
+            controller.PaymentAmount = 500m;
+
+            // An admin raises the price while the item is already in the cart.
+            await _db.ExecuteAsync("UPDATE ProductVariants SET SellingPrice = 90 WHERE VariantID = @Id", ("@Id", variantId));
+
+            InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => controller.FinalizeSaleAsync(customerId));
+
+            Assert.Contains("no longer matches current prices", ex.Message);
+            Assert.Equal(10, await _db.StockAsync(variantId));
+            Assert.Equal(0, await _db.CountAsync("Sales"));
+            Assert.Single(controller.CartItems);
+        }
+
+        [ScratchDbFact]
         public async Task Cashier_SeesOwnSalesButNotAnotherCashiers()
         {
             await _db.ResetAsync();
