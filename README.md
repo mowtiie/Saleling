@@ -108,7 +108,9 @@ The following packages must be installed in your project to handle configuration
     * Open the solution file (`.sln`) in Visual Studio.
     * Build the solution and run the application (F5).
 
-### Default Login Credentials
+### Default Login Credentials (Demo Only)
+
+> **Warning:** These accounts are seeded by `PostDeployment.sql` for demonstration and grading purposes only. Their passwords are published in this README and the application does not force a password change, so **never deploy with these accounts**. Before any real use, delete them or change their passwords.
 
 *Note: Passwords are BCrypt-hashed in the database. These are the plaintext values for login.*
 

@@ -44,7 +44,7 @@ namespace Saleling.Repository
             using (SqlConnection sqlConnection = new SqlConnection(_connectionString))
             {
                 await sqlConnection.OpenAsync();
-                using (SqlCommand sqlCommand = new SqlCommand("sp_GetProductsForPOS", sqlConnection))
+                using (SqlCommand sqlCommand = new SqlCommand("sp_GetSaleableProducts", sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
                     using (SqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync())
@@ -61,7 +61,7 @@ namespace Saleling.Repository
                                 Color = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Color")),
                                 SellingPrice = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("SellingPrice")),
                                 StockQuantity = sqlDataReader.GetInt32(sqlDataReader.GetOrdinal("StockQuantity")),
-                                Category = sqlDataReader.GetString(sqlDataReader.GetOrdinal("CategoryName"))
+                                Category = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Category"))
                             };
                             availableProducts.Add(product);
                         }
