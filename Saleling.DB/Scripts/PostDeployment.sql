@@ -62,6 +62,8 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS (SELECT 1 FROM Products)
+BEGIN
 DECLARE @WalkInCustomerID INT;
 SELECT @WalkInCustomerID = CustomerID FROM Customers WHERE FirstName = 'Walk-In' AND LastName = 'Customer';
 
@@ -175,4 +177,9 @@ END
 
 PRINT 'Successfully inserted ' + CAST(@MaxRecords AS VARCHAR) + ' products and ' + 
       CAST(@MaxRecords * @VariantsPerProduct AS VARCHAR) + ' associated variants/inventory records.';
+END
+ELSE
+BEGIN
+    PRINT 'Products already exist. Skipping product seed data.';
+END
 GO

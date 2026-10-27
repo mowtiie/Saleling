@@ -93,20 +93,30 @@ The following packages are referenced by the projects (restored automatically by
 
 ## 🚀 Setup & Execution
 
+### Prerequisites
+
+* **Visual Studio 2022** with the **.NET desktop development** and **Data storage and processing** (SQL Server Data Tools) workloads. The `Saleling.DB` project is an SSDT project, so `dotnet build` cannot build or publish it.
+* **.NET 8 SDK**
+* **SQL Server LocalDB** (installed with the Data storage and processing workload)
+
+### Steps
+
 1.  **Clone the Repository:**
     ```bash
     git clone https://github.com/mowtiie/Saleling
     ```
-2.  **Database Configuration:**
-    * Publish the `Saleling.DB` project to your local SQL Server (right-click > Publish in Visual Studio). This creates the schema and runs the seed script.
-    * The application is configured to use the following **connection string** for local development:
-      ```
-      Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Saleling.DB;Integrated Security=True
-      ```
-    * Ensure this connection string is correctly configured in your application's configuration file (e.g., `app.config`).
-3.  **Run the Project:**
-    * Open the solution file (`.sln`) in Visual Studio.
-    * Build the solution and run the application (F5).
+2.  **Open the Solution:** Open `Saleling.sln` in Visual Studio.
+3.  **Publish the Database:**
+    * Right-click the `Saleling.DB` project and choose **Publish**.
+    * Set the target database connection to server `(localdb)\MSSQLLocalDB` and the **database name to `Saleling.DB`** (the application connects to this exact name).
+    * Click **Publish**. This creates the schema and runs the seed script (users, categories, suppliers, a walk-in customer, and 100 sample products).
+    * The seed script skips any data that already exists, so re-publishing is safe.
+4.  **Check the Connection String:** The application is configured to use the following connection string for local development in `Saleling.UI/App.config`:
+    ```
+    Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Saleling.DB;Integrated Security=True
+    ```
+    Change it if your SQL Server instance or database name is different.
+5.  **Run the Project:** Set `Saleling.UI` as the startup project, then build and run the application (F5).
 
 ### Default Login Credentials (Demo Only)
 
