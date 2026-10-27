@@ -9,9 +9,9 @@ namespace Saleling.Repository
     {
         private readonly string connectionString;
 
-        public UserRepository()
+        public UserRepository(string? connectionString = null)
         {
-            this.connectionString = ConfigurationUtil.GetConnectionString();
+            this.connectionString = connectionString ?? ConfigurationUtil.GetConnectionString();
         }
 
         public async Task<List<UserModel>> GetAllCashierAsync()

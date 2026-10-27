@@ -9,9 +9,9 @@ namespace Saleling.Repository
     {
         private readonly string _connectionString;
 
-        public InventoryRepository()
+        public InventoryRepository(string? connectionString = null)
         {
-            _connectionString = ConfigurationUtil.GetConnectionString();
+            _connectionString = connectionString ?? ConfigurationUtil.GetConnectionString();
         }
 
         public async Task<int> GetLowStockCountAsync()

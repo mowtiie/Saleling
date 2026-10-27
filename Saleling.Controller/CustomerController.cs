@@ -1,5 +1,6 @@
 ﻿using Saleling.Model;
 using Saleling.Repository;
+using Saleling.Util;
 
 namespace Saleling.Controller
 {
@@ -14,6 +15,7 @@ namespace Saleling.Controller
 
         public async Task<CustomerModel> GetWalkInCustomerAsync()
         {
+            SessionUtil.Instance.RequireLogin();
             CustomerModel? walkInCustomer = await _customerRepository.GetWalkInCustomerAsync();
             if (walkInCustomer == null)
             {

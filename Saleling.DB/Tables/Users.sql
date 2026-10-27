@@ -4,5 +4,5 @@
     LastName VARCHAR(50) NOT NULL,
     Username VARCHAR(50) UNIQUE NOT NULL,
     HashedPassword VARCHAR(255) NOT NULL,
-    Role VARCHAR(10) NOT NULL
+    Role VARCHAR(10) NOT NULL CONSTRAINT CK_Users_Role CHECK (Role IN ('Admin', 'Cashier'))
 );

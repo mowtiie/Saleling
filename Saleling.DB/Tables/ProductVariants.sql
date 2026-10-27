@@ -6,7 +6,7 @@
     Color VARCHAR(50) NOT NULL,
     CostPrice DECIMAL(12, 2) NOT NULL,
     SellingPrice DECIMAL(12, 2) NOT NULL,
-    StockQuantity INT NOT NULL DEFAULT 0,
+    StockQuantity INT NOT NULL DEFAULT 0 CONSTRAINT CK_ProductVariants_StockQuantity CHECK (StockQuantity >= 0),
     ReorderLevel INT NOT NULL DEFAULT 5,
     Status VARCHAR(20) NOT NULL CHECK (Status IN ('Active', 'Discontinued')) DEFAULT 'Active',
 

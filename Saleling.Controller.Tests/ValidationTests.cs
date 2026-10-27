@@ -26,6 +26,11 @@ namespace Saleling.Controller.Tests
     {
         private readonly ProductController _controller = new ProductController();
 
+        public ProductControllerValidationTests()
+        {
+            TestData.LoginAsAdmin();
+        }
+
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
@@ -119,6 +124,11 @@ namespace Saleling.Controller.Tests
     public class InventoryControllerValidationTests
     {
         private readonly InventoryController _controller = new InventoryController();
+
+        public InventoryControllerValidationTests()
+        {
+            TestData.LoginAsAdmin();
+        }
 
         private static InventoryLogTransactionModel ValidLog() => new InventoryLogTransactionModel
         {

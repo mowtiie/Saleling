@@ -18,6 +18,13 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <!-- The integration tests build a throwaway database from the Saleling.DB project's own scripts. -->
+  <ItemGroup>
+    <Content Include="..\Saleling.DB\Tables\*.sql" Link="DbScripts\Tables\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Saleling.DB\Types\*.sql" Link="DbScripts\Types\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Saleling.DB\StoredProcedures\*.sql" Link="DbScripts\StoredProcedures\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- The test host, not this assembly, is the entry point, so ConfigurationManager looks for testhost.dll.config. -->
   <Target Name="CopyAppConfigForTestHost" AfterTargets="Build">
     <Copy SourceFiles="App.config" DestinationFiles="$(OutDir)testhost.dll.config" />

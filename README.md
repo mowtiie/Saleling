@@ -59,6 +59,7 @@ The project separates concerns across four distinct layers:
 ### Code & Security Principles
 
 * **Secure Password Hashing:** User passwords are secured using the **BCrypt algorithm**, providing strong, slow hashing to protect against brute-force attacks.
+* **Role-Based Authorization:** The controllers enforce roles themselves, not just the UI. Only **Admins** can maintain products, adjust inventory, list cashiers and see store-wide sales, and only **Cashiers** can process sales. Cashiers can only view their own sales data. Roles are also constrained in the database (`Admin` or `Cashier`), and stock can never go below zero.
 * **Error Management:** Extensive use of **`try-catch` / `throw exception`** throughout the application to handle and log errors gracefully, especially in data access and critical business logic.
 * **Data Structures:** **C\# Collections** (e.g., `List<T>`) are used to efficiently store and manage groups of related objects, like the product catalog or items in a shopping cart.
 
@@ -141,6 +142,14 @@ The following packages are referenced by the projects (restored automatically by
     ```
     Change it if your SQL Server instance or database name is different.
 5.  **Run the Project:** Set `Saleling.UI` as the startup project, then build and run the application (F5).
+
+### Running the Tests
+
+```bash
+dotnet test Saleling.Controller.Tests
+```
+
+Most tests need no database. The integration tests create a throwaway database on your `(localdb)\MSSQLLocalDB` instance from the `Saleling.DB` scripts and drop it afterwards, so they never touch your real `Saleling.DB` data. If LocalDB is not available they are skipped, not failed.
 
 ### Default Login Credentials (Demo Only)
 

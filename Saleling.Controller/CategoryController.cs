@@ -1,4 +1,5 @@
 ﻿using Saleling.Repository;
+using Saleling.Util;
 
 namespace Saleling.Controller
 {
@@ -13,11 +14,13 @@ namespace Saleling.Controller
 
         public async Task<List<string>> GetAllNamesAsync()
         {
+            SessionUtil.Instance.RequireLogin();
             return await _categoryRepository.GetAllNamesAsync();
         }
 
         public async Task<int> GetTotalCountAsync()
         {
+            SessionUtil.Instance.RequireLogin();
             return await _categoryRepository.GetTotalCountAsync();
         }
     }

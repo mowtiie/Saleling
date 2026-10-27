@@ -1,5 +1,6 @@
 ﻿using Saleling.Model.Inventory;
 using Saleling.Repository;
+using Saleling.Util;
 
 namespace Saleling.Controller
 {
@@ -7,23 +8,30 @@ namespace Saleling.Controller
     {
         private readonly InventoryRepository _inventoryRepository;
 
-        public InventoryController()
+        public InventoryController() : this(new InventoryRepository())
         {
-            _inventoryRepository = new InventoryRepository();
+        }
+
+        public InventoryController(InventoryRepository inventoryRepository)
+        {
+            _inventoryRepository = inventoryRepository;
         }
 
         public async Task<int> GetOutOfStockCount()
         {
+            SessionUtil.Instance.RequireLogin();
             return await _inventoryRepository.GetOutOfStockCountAsync();
         }
 
         public async Task<int> GetLowStockCount()
         {
+            SessionUtil.Instance.RequireLogin();
             return await _inventoryRepository.GetLowStockCountAsync();
         }
 
         public async Task<List<InventoryItemModel>> SearchInventoryAsync(string searchTerm, string searchFilter)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             if (string.IsNullOrEmpty(searchTerm))
             {
                 throw new Exception("Please enter a query to search the inventory");
@@ -39,6 +47,7 @@ namespace Saleling.Controller
 
         public async Task LogTransactionAsync(InventoryLogTransactionModel logTransaction)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             if (logTransaction.VariantID <= 0)
             {
                 throw new Exception("Invalid Inventory Item ID");
@@ -65,11 +74,13 @@ namespace Saleling.Controller
 
         public async Task<List<InventoryItemModel>> GetAllAsync()
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             return await _inventoryRepository.GetAllAsync();
         }
 
         public async Task<List<InventoryLogModel>> GetLogsAsync(int inventoryItemID)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             if (inventoryItemID <= 0)
             {
                 throw new Exception("Invalid Inventory Item ID");
@@ -80,6 +91,7 @@ namespace Saleling.Controller
 
         public async Task<List<InventoryStockReportModel>> GetStockReportAsync()
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             return await _inventoryRepository.GetStockReportAsync();
         }
 
@@ -88,6 +100,7 @@ namespace Saleling.Controller
             DateTime? customStartDate,
             DateTime? customEndDate)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             DateTime? startDate = null;
             DateTime? endDate = null;
 
@@ -109,6 +122,7 @@ namespace Saleling.Controller
             DateTime? customStartDate,
             DateTime? customEndDate)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             DateTime? startDate = null;
             DateTime? endDate = null;
 
@@ -135,6 +149,7 @@ namespace Saleling.Controller
 
         public async Task<InventoryStockKPIModel> GetStockKPIsAsync()
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             InventoryStockKPIModel? stockKPI = await _inventoryRepository.GetStockKPIsAsync();
             if (stockKPI == null)
             {

@@ -1,5 +1,6 @@
 ﻿using Saleling.Model.Product;
 using Saleling.Repository;
+using Saleling.Util;
 
 namespace Saleling.Controller
 {
@@ -7,13 +8,18 @@ namespace Saleling.Controller
     {
         private readonly ProductRepository _productRepository;
 
-        public ProductController()
+        public ProductController() : this(new ProductRepository())
         {
-            _productRepository = new ProductRepository();
+        }
+
+        public ProductController(ProductRepository productRepository)
+        {
+            _productRepository = productRepository;
         }
 
         public async Task<ProductVariantModel> GetProductVariantByIDAsync(int productVariantID)
         {
+            SessionUtil.Instance.RequireLogin();
             if (productVariantID <= 0)
             {
                 throw new Exception("Invalid Product Variant ID");
@@ -30,6 +36,7 @@ namespace Saleling.Controller
 
         public async Task AddProductVariantAsync(ProductVariantModel productVariant, int processedByUserID)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             if (productVariant.ProductID <= 0)
             {
                 throw new Exception("Invalid parent product ID");
@@ -60,6 +67,7 @@ namespace Saleling.Controller
 
         public async Task AddProductAsync(ProductModel product)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             if (string.IsNullOrEmpty(product.ProductName))
             {
                 throw new Exception("Please enter a name for the product");
@@ -70,6 +78,7 @@ namespace Saleling.Controller
 
         public async Task EditProductVariantAsync(ProductVariantModel productVariant)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             if (productVariant.VariantID <= 0)
             {
                 throw new Exception("Invalid product variant ID");
@@ -100,6 +109,7 @@ namespace Saleling.Controller
 
         public async Task EditProductAsync(ProductModel product)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             if (string.IsNullOrEmpty(product.ProductName))
             {
                 throw new Exception("Please enter a name for the product");
@@ -110,16 +120,19 @@ namespace Saleling.Controller
 
         public async Task<int> GetTotalCountAsync()
         {
+            SessionUtil.Instance.RequireLogin();
             return await _productRepository.GetTotalCountAsync();
         }
 
         public async Task<List<ProductModel>> GetProductsAsync()
         {
+            SessionUtil.Instance.RequireLogin();
             return await _productRepository.GetProductsAsync();
         }
 
         public async Task<ProductModel> GetProductByIDAsync(int productID)
         {
+            SessionUtil.Instance.RequireLogin();
             if (productID <= 0)
             {
                 throw new Exception("Invalid Product ID");
@@ -136,6 +149,7 @@ namespace Saleling.Controller
 
         public async Task<List<ProductVariantModel>> GetProductVariantsAsync(int productID)
         {
+            SessionUtil.Instance.RequireLogin();
             if (productID <= 0)
             {
                 throw new Exception("Invalid Product ID");
@@ -146,6 +160,7 @@ namespace Saleling.Controller
 
         public async Task DeleteProductVariantID(int productVariantID)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             if (productVariantID <= 0)
             {
                 throw new Exception("Invalid Product Variant ID");
@@ -156,6 +171,7 @@ namespace Saleling.Controller
 
         public async Task DeleteProductAsync(int productID)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             if (productID <= 0)
             {
                 throw new Exception("Invalid Product ID");
@@ -166,6 +182,7 @@ namespace Saleling.Controller
 
         public async Task DeleteProductVariantAsync(int productVariantID)
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             if (productVariantID <= 0)
             {
                 throw new Exception("Invalid Product Variant ID");
@@ -176,6 +193,7 @@ namespace Saleling.Controller
 
         public async Task<List<ProductModel>> SearchProductsAsync(string searchTerm, string searchFilter)
         {
+            SessionUtil.Instance.RequireLogin();
             if (string.IsNullOrEmpty(searchTerm) || string.IsNullOrEmpty(searchFilter))
             {
                 throw new Exception("Please enter both a query and filter to search");
@@ -186,16 +204,19 @@ namespace Saleling.Controller
 
         public async Task<List<ProductStockAlertModel>> GetStockAlertsAsync()
         {
+            SessionUtil.Instance.RequireLogin();
             return await _productRepository.GetStockAlertsAsync();
         }
 
         public async Task<List<ProductListingModel>> GetProductListingsAsync()
         {
+            SessionUtil.Instance.RequireLogin();
             return await _productRepository.GetProductListingsAsync();
         }
 
         public async Task<List<ProductListingModel>> SearchProductListingsAsync(string searchTerm, string searchFilter)
         {
+            SessionUtil.Instance.RequireLogin();
             if (string.IsNullOrEmpty(searchTerm) || string.IsNullOrEmpty(searchFilter))
             {
                 throw new InvalidOperationException("Please enter both a query and filter to search");

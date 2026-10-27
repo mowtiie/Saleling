@@ -8,14 +8,29 @@ namespace Saleling.Controller.Tests
     {
         public static void LoginAsCashier(int userId = 7)
         {
+            LoginAs(Roles.Cashier, userId);
+        }
+
+        public static void LoginAsAdmin(int userId = 1)
+        {
+            LoginAs(Roles.Admin, userId);
+        }
+
+        public static void Logout()
+        {
+            SessionUtil.Instance.Logout();
+        }
+
+        private static void LoginAs(string role, int userId)
+        {
             SessionUtil.Instance.SetLoggedInUser(new UserModel
             {
                 UserID = userId,
                 FirstName = "Test",
-                LastName = "Cashier",
-                Username = "testcashier",
+                LastName = role,
+                Username = $"test{role.ToLowerInvariant()}",
                 HashedPassword = string.Empty,
-                Role = "Cashier"
+                Role = role
             });
         }
 

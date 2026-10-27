@@ -19,6 +19,28 @@ namespace Saleling.Util
             get { lock (lockObject) { return currentUser; } }
         }
 
+        public UserModel RequireLogin()
+        {
+            UserModel? user = CurrentUser;
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("You must be logged in to perform this action.");
+            }
+
+            return user;
+        }
+
+        public UserModel RequireRole(params string[] allowedRoles)
+        {
+            UserModel user = RequireLogin();
+            if (!allowedRoles.Contains(user.Role))
+            {
+                throw new UnauthorizedAccessException("You do not have permission to perform this action.");
+            }
+
+            return user;
+        }
+
         public void SetLoggedInUser(UserModel account)
         {
             lock (lockObject)

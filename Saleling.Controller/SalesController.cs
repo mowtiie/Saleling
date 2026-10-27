@@ -1,4 +1,5 @@
-﻿using Saleling.Model.Product;
+﻿using Saleling.Model;
+using Saleling.Model.Product;
 using Saleling.Model.Sale;
 using Saleling.Repository;
 using Saleling.Util;
@@ -19,11 +20,15 @@ namespace Saleling.Controller
 
         public decimal PaymentAmount { get; set; }
 
-        public SalesController()
+        public SalesController() : this(new SalesRepository(), new ProductRepository())
         {
-            _productRepository = new ProductRepository();
-            _salesRepository = new SalesRepository();
-            _currentCashierID = SessionUtil.Instance.CurrentUser.UserID;
+        }
+
+        public SalesController(SalesRepository salesRepository, ProductRepository productRepository)
+        {
+            _productRepository = productRepository;
+            _salesRepository = salesRepository;
+            _currentCashierID = SessionUtil.Instance.RequireLogin().UserID;
             _cartItems = new List<SalesCartModel>();
             PaymentAmount = 0.00m;
         }
@@ -137,6 +142,8 @@ namespace Saleling.Controller
 
         public async Task<int> FinalizeSaleAsync(int customerID)
         {
+            SessionUtil.Instance.RequireRole(Roles.Cashier);
+
             if (!_cartItems.Any())
             {
                 throw new InvalidOperationException("Cannot process sale: The cart is empty.");
@@ -173,11 +180,13 @@ namespace Saleling.Controller
 
         public async Task<List<POSProductModel>> GetAvailableProductsAsync()
         {
+            SessionUtil.Instance.RequireLogin();
             return await _productRepository.GetSaleableProductsAsync();
         }
 
         public async Task<List<POSProductModel>> SearchAvailableProductsAsync(string searchTerm, string searchFilter)
         {
+            SessionUtil.Instance.RequireLogin();
             if (string.IsNullOrEmpty(searchTerm) || string.IsNullOrEmpty(searchFilter))
             {
                 throw new InvalidOperationException("Please select both a search term and a search filter");
@@ -301,6 +310,8 @@ namespace Saleling.Controller
             DateTime? customEndDate,
             int? processedByUserID = null)
         {
+            RequireOwnDataUnlessAdmin(processedByUserID);
+
             DateTime? startDate = null;
             DateTime? endDate = null;
 
@@ -323,6 +334,8 @@ namespace Saleling.Controller
             DateTime? customEndDate,
             int? processedByUserID = null)
         {
+            RequireOwnDataUnlessAdmin(processedByUserID);
+
             DateTime? startDate = null;
             DateTime? endDate = null;
 
@@ -381,37 +394,59 @@ namespace Saleling.Controller
 
         public async Task<decimal> GetTotalSalesAsync()
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             return await _salesRepository.GetTotalSalesAsync();
         }
 
         public async Task<int> GetTransactionCountAsync()
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             return await _salesRepository.GetTransactionCountAsync();
         }
 
         public async Task<decimal> GetTotalSalesTodayByUserIDAsync(int userID)
         {
+            RequireOwnDataUnlessAdmin(userID);
             return await _salesRepository.GetTotalSalesTodayByUserIDAsync(userID);
         }
 
         public async Task<decimal> GetAvgItemsPerTransactionTodayByUserIDAsync(int userID)
         {
+            RequireOwnDataUnlessAdmin(userID);
             return await _salesRepository.GetAvgItemsPerTransactionTodayByUserIDAsync(userID);
         }
 
         public async Task<int> GetTotalItemsSoldTodayByUserIDAsync(int userID)
         {
+            RequireOwnDataUnlessAdmin(userID);
             return await _salesRepository.GetTotalItemsSoldTodayByUserIDAsync(userID);
         }
 
         public async Task<int> GetTransactionCountTodayByUserIDAsync(int userID)
         {
+            RequireOwnDataUnlessAdmin(userID);
             return await _salesRepository.GetTransactionCountTodayByUserIDAsync(userID);
         }
 
         public async Task<List<SalesAlertModel>> GetRecentSalesAsync(int? processedByUserID = null)
         {
+            RequireOwnDataUnlessAdmin(processedByUserID);
             return await _salesRepository.GetRecentSalesAsync(processedByUserID);
+        }
+
+        // Admins may look at any cashier's data (or everyone's, with null); cashiers only at their own.
+        private static void RequireOwnDataUnlessAdmin(int? requestedUserID)
+        {
+            UserModel user = SessionUtil.Instance.RequireLogin();
+            if (user.Role == Roles.Admin)
+            {
+                return;
+            }
+
+            if (requestedUserID != user.UserID)
+            {
+                throw new UnauthorizedAccessException("You can only view your own sales data.");
+            }
         }
     }
 }

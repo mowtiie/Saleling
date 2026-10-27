@@ -17,6 +17,7 @@ namespace Saleling.Controller.Tests
         [LocalDbFact]
         public async Task ProductTotalCount_CountsActiveProducts()
         {
+            TestData.LoginAsAdmin();
             int expected = await ScalarAsync("SELECT COUNT(*) FROM Products WHERE Status = 'Active'");
 
             int actual = await new ProductController().GetTotalCountAsync();
@@ -27,6 +28,7 @@ namespace Saleling.Controller.Tests
         [LocalDbFact]
         public async Task ProductTotalCount_IsNotTheVariantCount()
         {
+            TestData.LoginAsAdmin();
             int variants = await ScalarAsync("SELECT COUNT(*) FROM ProductVariants");
             int products = await ScalarAsync("SELECT COUNT(*) FROM Products");
             Assert.True(variants > products, "Seed data should have more variants than products for this check to mean anything.");

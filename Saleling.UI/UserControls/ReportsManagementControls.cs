@@ -328,6 +328,11 @@ namespace Saleling.UI
 
         private async Task LoadCashierNames()
         {
+            if (!_currentUser.Role.Equals("Admin"))
+            {
+                return;
+            }
+
             _cashiers = await _userController.GetAllCashierAsync();
             foreach (UserModel cashier in _cashiers)
             {

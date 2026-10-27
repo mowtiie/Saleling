@@ -8,13 +8,18 @@ namespace Saleling.Controller
     {
         private readonly UserRepository _userRepository;
 
-        public UserController()
+        public UserController() : this(new UserRepository())
         {
-            this._userRepository = new UserRepository();
+        }
+
+        public UserController(UserRepository userRepository)
+        {
+            this._userRepository = userRepository;
         }
 
         public async Task<List<UserModel>> GetAllCashierAsync()
         {
+            SessionUtil.Instance.RequireRole(Roles.Admin);
             return await _userRepository.GetAllCashierAsync();
         }
 

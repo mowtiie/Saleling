@@ -10,9 +10,9 @@ namespace Saleling.Repository
     {
         private readonly string _connectionString;
 
-        public SalesRepository()
+        public SalesRepository(string? connectionString = null)
         {
-            _connectionString = ConfigurationUtil.GetConnectionString();
+            _connectionString = connectionString ?? ConfigurationUtil.GetConnectionString();
         }
 
         private DataTable ConvertItemsToDataTable(List<SalesItemModel> items)

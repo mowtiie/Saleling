@@ -8,9 +8,9 @@ namespace Saleling.Repository
     {
         private readonly string _connectionString;
 
-        public CustomerRepository()
+        public CustomerRepository(string? connectionString = null)
         {
-            _connectionString = ConfigurationUtil.GetConnectionString();
+            _connectionString = connectionString ?? ConfigurationUtil.GetConnectionString();
         }
 
         public async Task<CustomerModel?> GetWalkInCustomerAsync()
