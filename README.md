@@ -56,7 +56,7 @@ A few things worth knowing:
 * **Roles are enforced in the code, not just the screens.** Only Admins can manage products, adjust inventory and see store-wide sales. Only Cashiers can make sales, and they can only see their own. Stock can never go below zero.
 * **Sales are all-or-nothing.** If updating the stock fails, the sale is cancelled too.
 * **Reports come from stored procedures** in the database.
-* **Settings live in a config file.** The database connection string is in `Saleling.UI/App.config`.
+* **Settings live in a config file.** The database connection strings are in `Saleling.UI/App.config`, and you can switch between them without editing the file.
 * **Errors are logged** to `Saleling-Debug.logs` in the app's folder (`bin\Debug\net8.0-windows`).
 
 ---
@@ -115,11 +115,11 @@ NuGet packages (installed automatically):
     * Set the target server to `(localdb)\MSSQLLocalDB` (or your own SQL Server) and the database name to **`Saleling.DB`**. The app expects this exact name.
     * Click **Publish**. This creates the tables and adds the starting data: users, categories, suppliers, a walk-in customer and 100 sample products.
     * Publishing again is safe. Existing data is not duplicated.
-4.  **Check the connection string** in `Saleling.UI/App.config`. By default it is:
-    ```
-    Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Saleling.DB;Integrated Security=True
-    ```
-    If you use a different server, change it here. You can also set the `SALELING_CONNECTION_STRING` environment variable instead of editing the file. It takes priority over `App.config`.
+4.  **Choose a database profile.** `Saleling.UI/App.config` has two ready-made connection strings, called profiles:
+    * `LocalDb` uses `(localdb)\MSSQLLocalDB`. This is the default.
+    * `SqlExpress` uses `.\SQLEXPRESS`.
+
+    To switch, see [Switching between LocalDB and SQL Server](#switching-between-localdb-and-sql-server).
 5.  **Run the app:** Set `Saleling.UI` as the startup project and press F5.
 
 ### Using SSMS or a full SQL Server
@@ -138,13 +138,31 @@ SSMS is just a tool for looking at a database. It does not replace LocalDB, but 
 1. Install SQL Server (Express or Developer) and SSMS. Note the instance name, for example `localhost\SQLEXPRESS`.
 2. Connect to that instance in SSMS to make sure it works.
 3. In Visual Studio, publish `Saleling.DB` to that instance (step 3 above). Keep the database name `Saleling.DB`.
-4. Tell the app where the database is, either by editing `Saleling.UI/App.config` or by setting the environment variable (then restart Visual Studio):
-   ```powershell
-   setx SALELING_CONNECTION_STRING "Data Source=localhost\SQLEXPRESS;Initial Catalog=Saleling.DB;Integrated Security=True;TrustServerCertificate=True"
-   ```
+4. Switch the app to the `SqlExpress` profile (see the next section).
 5. Run the app. Open the same instance in SSMS to see the data change as you use it.
 
-> **Tip:** Keep `TrustServerCertificate=True` in the connection string for a local SQL Server. Without it, the app may fail with a certificate error. If you log in with a SQL username instead of Windows, replace `Integrated Security=True` with `User ID=yourname;Password=yourpassword`.
+If your instance has a different name than `SQLEXPRESS`, edit the `SqlExpress` entry in `Saleling.UI/App.config`. If you log in with a SQL username instead of Windows, replace `Integrated Security=True` with `User ID=yourname;Password=yourpassword`. Keep `TrustServerCertificate=True` for a local SQL Server, or the app may fail with a certificate error.
+
+### Switching between LocalDB and SQL Server
+
+The app picks its database in this order, and the first one that is set wins:
+
+1. `SALELING_CONNECTION_STRING`: a full connection string, for special cases such as another machine.
+2. `SALELING_DB_PROFILE`: the name of a profile, `LocalDb` or `SqlExpress`.
+3. `DatabaseProfile` in `Saleling.UI/App.config`, which is `LocalDb` by default.
+
+The easiest way to switch is the environment variable. It stays on your computer, so you never commit it and your teammates are not affected:
+
+```powershell
+setx SALELING_DB_PROFILE SqlExpress     # use SQL Server Express
+setx SALELING_DB_PROFILE LocalDb        # go back to LocalDB
+```
+
+Restart Visual Studio after running `setx`, because it only reads environment variables when it starts. To stop using the variable, so the app falls back to `App.config`, run `setx SALELING_DB_PROFILE ""`. A blank value counts as not set.
+
+If you type a profile name that does not exist, the app shows an error that lists the valid names.
+
+Each server has its own copy of `Saleling.DB`. When you switch, publish the database to the new server first (step 3).
 
 ### Running the tests
 
@@ -152,7 +170,7 @@ SSMS is just a tool for looking at a database. It does not replace LocalDB, but 
 dotnet test Saleling.Controller.Tests
 ```
 
-Most tests do not need a database. The database tests build a temporary copy of the database on LocalDB (`(localdb)\MSSQLLocalDB`) and delete it afterwards, so your real `Saleling.DB` data is never touched. If LocalDB is not installed, those tests are skipped instead of failing. They always use LocalDB, even if `SALELING_CONNECTION_STRING` is set.
+Most tests do not need a database. The database tests build a temporary copy of the database on the server you have selected (LocalDB by default) and delete it afterwards, so your real `Saleling.DB` data is never touched. If that server cannot be reached, those tests are skipped instead of failing.
 
 The same tests run automatically on GitHub for every push and pull request (see `.github/workflows/ci.yml`).
 

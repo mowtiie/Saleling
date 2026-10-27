@@ -6,26 +6,30 @@ namespace Saleling.Controller.Tests
 {
     public class ConfigurationUtilTests
     {
-        private const string Variable = ConfigurationUtil.CONNECTION_STRING_ENVIRONMENT_VARIABLE;
+        private const string ConnectionStringVariable = ConfigurationUtil.CONNECTION_STRING_ENVIRONMENT_VARIABLE;
+        private const string ProfileVariable = ConfigurationUtil.PROFILE_ENVIRONMENT_VARIABLE;
 
-        private static void WithEnvironmentVariable(string? value, Action assertions)
+        private static void WithEnvironment(string? connectionString, string? profile, Action assertions)
         {
-            string? original = Environment.GetEnvironmentVariable(Variable);
+            string? originalConnectionString = Environment.GetEnvironmentVariable(ConnectionStringVariable);
+            string? originalProfile = Environment.GetEnvironmentVariable(ProfileVariable);
             try
             {
-                Environment.SetEnvironmentVariable(Variable, value);
+                Environment.SetEnvironmentVariable(ConnectionStringVariable, connectionString);
+                Environment.SetEnvironmentVariable(ProfileVariable, profile);
                 assertions();
             }
             finally
             {
-                Environment.SetEnvironmentVariable(Variable, original);
+                Environment.SetEnvironmentVariable(ConnectionStringVariable, originalConnectionString);
+                Environment.SetEnvironmentVariable(ProfileVariable, originalProfile);
             }
         }
 
         [Fact]
         public void GetConnectionString_PrefersTheEnvironmentVariable()
         {
-            WithEnvironmentVariable("Server=example;Database=Other;", () =>
+            WithEnvironment("Server=example;Database=Other;", "SqlExpress", () =>
                 Assert.Equal("Server=example;Database=Other;", ConfigurationUtil.GetConnectionString()));
         }
 
@@ -33,10 +37,33 @@ namespace Saleling.Controller.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
-        public void GetConnectionString_FallsBackToAppConfig(string? blank)
+        public void GetConnectionString_FallsBackToTheAppConfigProfile(string? blank)
         {
-            WithEnvironmentVariable(blank, () =>
-                Assert.Contains("Initial Catalog=Saleling.DB", ConfigurationUtil.GetConnectionString()));
+            WithEnvironment(blank, blank, () =>
+                Assert.Contains(@"(localdb)\MSSQLLocalDB", ConfigurationUtil.GetConnectionString()));
+        }
+
+        [Fact]
+        public void GetConnectionString_ProfileVariableSelectsAnAppConfigEntry()
+        {
+            WithEnvironment(null, "SqlExpress", () =>
+            {
+                string connectionString = ConfigurationUtil.GetConnectionString();
+                Assert.Contains(@".\SQLEXPRESS", connectionString);
+                Assert.Contains("Initial Catalog=Saleling.DB", connectionString);
+            });
+        }
+
+        [Fact]
+        public void GetConnectionString_UnknownProfile_ListsTheAvailableOnes()
+        {
+            WithEnvironment(null, "Nope", () =>
+            {
+                Exception ex = Assert.ThrowsAny<Exception>(() => ConfigurationUtil.GetConnectionString());
+                Assert.Contains("Nope", ex.Message);
+                Assert.Contains("LocalDb", ex.Message);
+                Assert.Contains("SqlExpress", ex.Message);
+            });
         }
     }
 
