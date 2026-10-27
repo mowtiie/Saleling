@@ -89,7 +89,6 @@
     <Build Include="StoredProcedures\sp_GetRecentStockAlerts.sql" />
     <Build Include="StoredProcedures\sp_GetRecentTransactions.sql" />
     <Build Include="StoredProcedures\sp_GetSaleableProducts.sql" />
-    <Build Include="StoredProcedures\sp_GetSaleReceiptDetails.sql" />
     <Build Include="StoredProcedures\sp_GetSaleReportsKPIs.sql" />
     <Build Include="StoredProcedures\sp_InventoryLogTransaction.sql" />
     <Build Include="StoredProcedures\sp_ProcessSaleTransaction.sql" />

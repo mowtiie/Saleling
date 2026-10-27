@@ -1,7 +1,7 @@
 ﻿using Saleling.Model.Product;
 using Saleling.Util;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Saleling.Repository
 {
@@ -397,7 +397,7 @@ namespace Saleling.Repository
                                 Size = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Size")),
                                 Color = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Color")),
                                 Category = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Category")),
-                                Supplier = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Supplier")),
+                                Supplier = sqlDataReader.GetSupplierName("Supplier"),
                                 Status = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Status"))
                             };
                             stockAlerts.Add(productStockAlert);
@@ -436,7 +436,7 @@ namespace Saleling.Repository
                                 ReorderLevel = sqlDataReader.GetInt32(sqlDataReader.GetOrdinal("ReorderLevel")),
                                 SellingPrice = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("SellingPrice")),
                                 Category = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Category")),
-                                Supplier = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Supplier"))
+                                Supplier = sqlDataReader.GetSupplierName("Supplier")
                             };
                             searchedProductListings.Add(productListing);
                         }
@@ -471,7 +471,7 @@ namespace Saleling.Repository
                                 ReorderLevel = sqlDataReader.GetInt32(sqlDataReader.GetOrdinal("ReorderLevel")),
                                 SellingPrice = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("SellingPrice")),
                                 Category = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Category")),
-                                Supplier = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Supplier"))
+                                Supplier = sqlDataReader.GetSupplierName("Supplier")
                             };
                             productListings.Add(productListing);
                         }

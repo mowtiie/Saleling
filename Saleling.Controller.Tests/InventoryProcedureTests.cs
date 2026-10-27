@@ -1,6 +1,6 @@
 using Saleling.Model.Inventory;
 using Saleling.Repository;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Saleling.Controller.Tests
 {

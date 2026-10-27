@@ -111,7 +111,7 @@ This project was developed by the following students:
 The following packages are referenced by the projects (restored automatically by NuGet) to handle configuration, database access, and password hashing:
 
 * **`System.Configuration.ConfigurationManager` (9.0.8, `Saleling.Util`):** Used to read the database connection string and application settings from the configuration file.
-* **`System.Data.SqlClient` (4.8.6, `Saleling.Repository`):** The primary provider for connecting to and interacting with the Microsoft SQL Server database.
+* **`Microsoft.Data.SqlClient` (5.2.2, `Saleling.Repository`):** The primary provider for connecting to and interacting with the Microsoft SQL Server database.
 * **`BCrypt.Net-Next` (4.0.3, `Saleling.Util`):** Provides the implementation of the **BCrypt hashing algorithm** for securing user passwords.
 
 ---
@@ -140,7 +140,7 @@ The following packages are referenced by the projects (restored automatically by
     ```
     Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Saleling.DB;Integrated Security=True
     ```
-    Change it if your SQL Server instance or database name is different.
+    Change it if your SQL Server instance or database name is different. To override it without editing files (for example on another machine), set the `SALELING_CONNECTION_STRING` environment variable; it takes priority over `App.config`.
 5.  **Run the Project:** Set `Saleling.UI` as the startup project, then build and run the application (F5).
 
 ### Running the Tests
@@ -149,7 +149,9 @@ The following packages are referenced by the projects (restored automatically by
 dotnet test Saleling.Controller.Tests
 ```
 
-Most tests need no database. The integration tests create a throwaway database on your `(localdb)\MSSQLLocalDB` instance from the `Saleling.DB` scripts and drop it afterwards, so they never touch your real `Saleling.DB` data. If LocalDB is not available they are skipped, not failed.
+Most tests need no database. The integration tests create a throwaway database on your `(localdb)\MSSQLLocalDB` instance from the `Saleling.DB` scripts and drop it afterwards, so they never touch your real `Saleling.DB` data. If LocalDB is not available they are skipped, not failed. The tests always use the LocalDB connection string in the test project, even if `SALELING_CONNECTION_STRING` is set.
+
+The same tests run on every push and pull request through GitHub Actions (`.github/workflows/ci.yml`). The workflow builds the C# projects individually, because `Saleling.DB` is an SSDT project that `dotnet` cannot build.
 
 ### Default Login Credentials (Demo Only)
 

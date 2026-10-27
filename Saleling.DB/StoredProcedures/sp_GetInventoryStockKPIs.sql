@@ -37,11 +37,25 @@ BEGIN
         AND P.Status = 'Active'
         AND PV.StockQuantity <= PV.ReorderLevel;
 
+    -- Out-of-stock SKUs count as below their reorder level, so the rate has to be taken
+    -- against every active SKU, not just the ones in stock, or it can pass 100%.
+    DECLARE @TotalActiveSKUs INT;
+
+    SELECT
+        @TotalActiveSKUs = COUNT(PV.VariantID)
+    FROM
+        ProductVariants PV
+    INNER JOIN
+        Products P ON PV.ProductID = P.ProductID
+    WHERE
+        PV.Status = 'Active'
+        AND P.Status = 'Active';
+
     DECLARE @LowStockRate DECIMAL(5, 2);
     SET @LowStockRate =
         CASE
-            WHEN @TotalSKUsInStock = 0 THEN 0.00
-            ELSE (CAST(@TotalSKUsBelowReorderLevel AS DECIMAL(5, 2)) / @TotalSKUsInStock) * 100.00
+            WHEN @TotalActiveSKUs = 0 THEN 0.00
+            ELSE CAST(@TotalSKUsBelowReorderLevel * 100.0 / @TotalActiveSKUs AS DECIMAL(5, 2))
         END;
 
     SELECT

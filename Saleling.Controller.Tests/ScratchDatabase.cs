@@ -1,5 +1,5 @@
 using Saleling.Util;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Text.RegularExpressions;
 
 namespace Saleling.Controller.Tests
@@ -169,10 +169,11 @@ namespace Saleling.Controller.Tests
                 ("@Username", username), ("@Hash", SecurityUtil.HashPassword(password)), ("@Role", role));
         }
 
-        public Task<int> SeedCustomerAsync()
+        public Task<int> SeedCustomerAsync(string firstName = "Walk-In", string lastName = "Customer", string? phone = null)
         {
             return ScalarAsync<int>(
-                "INSERT INTO Customers (FirstName, LastName) OUTPUT INSERTED.CustomerID VALUES ('Walk-In', 'Customer')");
+                "INSERT INTO Customers (FirstName, LastName, Phone, Email) OUTPUT INSERTED.CustomerID VALUES (@First, @Last, @Phone, @Email)",
+                ("@First", firstName), ("@Last", lastName), ("@Phone", (object?)phone ?? DBNull.Value), ("@Email", phone == null ? DBNull.Value : $"{phone}@example.test"));
         }
 
         public async Task<int> SeedVariantAsync(decimal sellingPrice = 100m, int stock = 10, string status = "Active")
@@ -194,6 +195,38 @@ namespace Saleling.Controller.Tests
                 "OUTPUT INSERTED.VariantID VALUES (@ProductID, @SKU, 'M', 'Black', 10, @Price, @Stock, @Status)",
                 ("@ProductID", _productId), ("@SKU", $"SKU-{Guid.NewGuid():N}"),
                 ("@Price", sellingPrice), ("@Stock", stock), ("@Status", status));
+        }
+
+        public Task<int> AddCategoryAsync(string name)
+        {
+            return ScalarAsync<int>(
+                "INSERT INTO Categories (CategoryName) OUTPUT INSERTED.CategoryID VALUES (@Name)", ("@Name", name));
+        }
+
+        public Task<int> AddSupplierAsync(string name)
+        {
+            return ScalarAsync<int>(
+                "INSERT INTO Suppliers (SupplierName) OUTPUT INSERTED.SupplierID VALUES (@Name)", ("@Name", name));
+        }
+
+        public Task<int> AddProductAsync(string name, int categoryId, int? supplierId = null, string status = "Active")
+        {
+            return ScalarAsync<int>(
+                "INSERT INTO Products (ProductName, CategoryID, SupplierID, Status) OUTPUT INSERTED.ProductID " +
+                "VALUES (@Name, @CategoryID, @SupplierID, @Status)",
+                ("@Name", name), ("@CategoryID", categoryId),
+                ("@SupplierID", supplierId.HasValue ? supplierId.Value : DBNull.Value), ("@Status", status));
+        }
+
+        public Task<int> AddVariantAsync(
+            int productId, string sku, decimal costPrice = 10m, decimal sellingPrice = 20m,
+            int stock = 10, int reorderLevel = 5, string status = "Active")
+        {
+            return ScalarAsync<int>(
+                "INSERT INTO ProductVariants (ProductID, SKU, Size, Color, CostPrice, SellingPrice, StockQuantity, ReorderLevel, Status) " +
+                "OUTPUT INSERTED.VariantID VALUES (@ProductID, @SKU, 'M', 'Black', @Cost, @Price, @Stock, @Reorder, @Status)",
+                ("@ProductID", productId), ("@SKU", sku), ("@Cost", costPrice), ("@Price", sellingPrice),
+                ("@Stock", stock), ("@Reorder", reorderLevel), ("@Status", status));
         }
 
         public Task<int> StockAsync(int variantId)

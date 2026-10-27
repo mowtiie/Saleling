@@ -8,9 +8,13 @@ namespace Saleling.Controller
     {
         private readonly CustomerRepository _customerRepository;
 
-        public CustomerController()
+        public CustomerController() : this(new CustomerRepository())
         {
-            _customerRepository = new CustomerRepository();
+        }
+
+        public CustomerController(CustomerRepository customerRepository)
+        {
+            _customerRepository = customerRepository;
         }
 
         public async Task<CustomerModel> GetWalkInCustomerAsync()

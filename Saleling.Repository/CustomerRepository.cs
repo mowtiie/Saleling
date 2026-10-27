@@ -1,6 +1,6 @@
 ﻿using Saleling.Model;
 using Saleling.Util;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Saleling.Repository
 {
@@ -19,10 +19,10 @@ namespace Saleling.Repository
             {
                 await sqlConnection.OpenAsync();
 
-                string query = "SELECT TOP 1 CustomerID, FirstName, LastName, Phone, Email, LoyaltyPoints FROM Customers WHERE CustomerID = @CustomerID";
+                // The seed script identifies the walk-in customer by name, so do the same instead of assuming ID 1.
+                string query = "SELECT TOP 1 CustomerID, FirstName, LastName, Phone, Email, LoyaltyPoints FROM Customers WHERE FirstName = 'Walk-In' AND LastName = 'Customer' ORDER BY CustomerID";
                 using (SqlCommand sqlCommand = new SqlCommand(query, sqlConnection))
                 {
-                    sqlCommand.Parameters.AddWithValue("@CustomerID", 1);
                     using (SqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync())
                     {
                         if (await sqlDataReader.ReadAsync())

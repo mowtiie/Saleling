@@ -1,4 +1,4 @@
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Saleling.Controller.Tests
 {
@@ -32,6 +32,43 @@ namespace Saleling.Controller.Tests
 
             Assert.Contains("CK_Users_Role", ex.Message);
             Assert.Equal(0, await _db.CountAsync("Users"));
+        }
+
+        [ScratchDbFact]
+        public async Task Customers_ManyCanLackAPhoneAndEmail()
+        {
+            await _db.ResetAsync();
+
+            await _db.SeedCustomerAsync("Walk-In", "Customer");
+            await _db.SeedCustomerAsync("Maria", "Santos");
+            await _db.SeedCustomerAsync("Jose", "Reyes");
+
+            Assert.Equal(3, await _db.CountAsync("Customers"));
+        }
+
+        [ScratchDbFact]
+        public async Task Customers_RejectDuplicatePhone()
+        {
+            await _db.ResetAsync();
+            await _db.SeedCustomerAsync("Maria", "Santos", phone: "09170000001");
+
+            SqlException ex = await Assert.ThrowsAsync<SqlException>(
+                () => _db.ExecuteAsync("INSERT INTO Customers (FirstName, LastName, Phone) VALUES ('Jose', 'Reyes', '09170000001')"));
+
+            Assert.Contains("UX_Customers_Phone", ex.Message);
+            Assert.Equal(1, await _db.CountAsync("Customers"));
+        }
+
+        [ScratchDbFact]
+        public async Task Customers_RejectDuplicateEmail()
+        {
+            await _db.ResetAsync();
+            await _db.ExecuteAsync("INSERT INTO Customers (FirstName, LastName, Email) VALUES ('Maria', 'Santos', 'a@example.test')");
+
+            SqlException ex = await Assert.ThrowsAsync<SqlException>(
+                () => _db.ExecuteAsync("INSERT INTO Customers (FirstName, LastName, Email) VALUES ('Jose', 'Reyes', 'a@example.test')"));
+
+            Assert.Contains("UX_Customers_Email", ex.Message);
         }
 
         [ScratchDbFact]

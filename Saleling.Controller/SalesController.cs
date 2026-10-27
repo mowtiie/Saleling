@@ -3,7 +3,7 @@ using Saleling.Model.Product;
 using Saleling.Model.Sale;
 using Saleling.Repository;
 using Saleling.Util;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Xml.Linq;
 
 namespace Saleling.Controller

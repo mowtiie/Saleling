@@ -2,7 +2,7 @@
 using Saleling.Model.Sale;
 using Saleling.Util;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Saleling.Repository
 {

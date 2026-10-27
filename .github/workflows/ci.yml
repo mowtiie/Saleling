@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build-and-test:
+    # The WinForms UI targets net8.0-windows, so this has to run on Windows.
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      # Saleling.DB is an SSDT (.sqlproj) project that dotnet cannot build, so build the
+      # C# projects individually instead of the whole solution.
+      - name: Build
+        run: dotnet build Saleling.UI --configuration Release
+
+      # Tests that need a database build a throwaway one on LocalDB. If LocalDB is not
+      # available on the runner they are skipped, not failed.
+      - name: Test
+        run: dotnet test Saleling.Controller.Tests --configuration Release --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/TestResults/*.trx"
+          if-no-files-found: ignore

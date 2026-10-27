@@ -36,11 +36,11 @@ BEGIN
             (
                 @SearchFilter = 'Category' AND C.CategoryName LIKE @SearchPattern
             )
-        )
-        OR (@SearchFilter IS NULL AND @SearchPattern IS NOT NULL AND (
+            OR (@SearchFilter IS NULL AND @SearchPattern IS NOT NULL AND (
                 P.ProductName LIKE @SearchPattern
                 OR C.CategoryName LIKE @SearchPattern
             ))
+        )
     ORDER BY
         P.ProductName ASC,
         PV.Size DESC;

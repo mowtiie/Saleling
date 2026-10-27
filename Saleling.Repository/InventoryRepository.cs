@@ -1,7 +1,7 @@
 ﻿using Saleling.Model.Inventory;
 using Saleling.Util;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Saleling.Repository
 {
@@ -38,7 +38,7 @@ namespace Saleling.Repository
             {
                 await sqlConnection.OpenAsync();
 
-                string query = "SELECT COUNT(VariantID) FROM ProductVariants WHERE StockQuantity = 0;";
+                string query = "SELECT COUNT(VariantID) FROM ProductVariants WHERE StockQuantity = 0 AND Status = 'Active';";
                 using (SqlCommand sqlCommand = new SqlCommand(query, sqlConnection))
                 {
                     object? result = await sqlCommand.ExecuteScalarAsync();
@@ -70,7 +70,7 @@ namespace Saleling.Repository
                                 ProductName = sqlDataReader.GetString(sqlDataReader.GetOrdinal("ProductName")),
                                 ProductStatus = sqlDataReader.GetString(sqlDataReader.GetOrdinal("ProductStatus")),
                                 Category = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Category")),
-                                Supplier = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Supplier")),
+                                Supplier = sqlDataReader.GetSupplierName("Supplier"),
                                 VariantID = sqlDataReader.GetInt32(sqlDataReader.GetOrdinal("VariantID")),
                                 SKU = sqlDataReader.GetString(sqlDataReader.GetOrdinal("SKU")),
                                 Size = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Size")),
@@ -128,7 +128,7 @@ namespace Saleling.Repository
                                 ChangeDate = sqlDataReader.GetDateTime(sqlDataReader.GetOrdinal("ChangeDate")),
                                 Reason = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Reason")),
                                 TransactionReferenceID = sqlDataReader.IsDBNull(sqlDataReader.GetOrdinal("TransactionReferenceID")) ? null : sqlDataReader.GetInt32(sqlDataReader.GetOrdinal("TransactionReferenceID")),
-                                Notes = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Notes")),
+                                Notes = sqlDataReader.GetStringOrEmpty("Notes"),
                                 Processor = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Processor")),
                                 Role = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Role"))
                             };
@@ -159,7 +159,7 @@ namespace Saleling.Repository
                                 ProductName = sqlDataReader.GetString(sqlDataReader.GetOrdinal("ProductName")),
                                 ProductStatus = sqlDataReader.GetString(sqlDataReader.GetOrdinal("ProductStatus")),
                                 Category = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Category")),
-                                Supplier = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Supplier")),
+                                Supplier = sqlDataReader.GetSupplierName("Supplier"),
                                 VariantID = sqlDataReader.GetInt32(sqlDataReader.GetOrdinal("VariantID")),
                                 SKU = sqlDataReader.GetString(sqlDataReader.GetOrdinal("SKU")),
                                 Size = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Size")),
@@ -207,7 +207,7 @@ namespace Saleling.Repository
                                 TransactionReferenceID = sqlDataReader.IsDBNull(transactionReferenceIDOrdinal)
                                                         ? null
                                                         : sqlDataReader.GetInt32(transactionReferenceIDOrdinal),
-                                Notes = sqlDataReader.GetString(sqlDataReader.GetOrdinal("Notes"))
+                                Notes = sqlDataReader.GetStringOrEmpty("Notes")
                             };
                             movementReport.Add(movementReportItem);
                         }
