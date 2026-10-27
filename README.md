@@ -183,20 +183,7 @@ On the other computer, deploy the database from SSMS (right-click **Databases**,
 
 The script needs the .NET 8 SDK and Visual Studio (with the Data storage and processing workload).
 
-### Versions and releases
-
-The app version is set in one place: `<Version>` in `Saleling.UI/Saleling.UI.csproj`. It appears on the login screen, in the exe's file properties, and in the name of the zip.
-
-To make a release:
-
-1. Change `<Version>` (for example `1.0.0` to `1.0.1`). Use `1.0.1` for fixes, `1.1.0` for new features and `2.0.0` for big changes. If the database changed, say so in the release notes.
-2. Commit, then run `.\build-package.ps1`.
-3. Tag the release and push the tag:
-   ```bash
-   git tag v1.0.1
-   git push origin v1.0.1
-   ```
-4. On GitHub, create a **Release** from that tag and attach the zip.
+The app version is set in `Saleling.UI/Saleling.UI.csproj` (`<Version>`). It shows on the login screen and in the zip's file name.
 
 ### Running the tests
 
