@@ -233,7 +233,7 @@ namespace Saleling.Repository
             {
                 await sqlConnection.OpenAsync();
 
-                string query = "SELECT COUNT(VariantID) FROM ProductVariants";
+                string query = "SELECT COUNT(ProductID) FROM Products WHERE Status = 'Active'";
                 using (SqlCommand sqlCommand = new SqlCommand(query, sqlConnection))
                 {
                     object? result = await sqlCommand.ExecuteScalarAsync();
