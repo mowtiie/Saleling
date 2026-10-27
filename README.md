@@ -63,18 +63,12 @@ A few things worth knowing:
 
 ## Team
 
-| Role | GitHub | Email |
-| :--- | :--- | :--- |
-| **Leader** | [mowtiie](https://github.com/mowtiie) | contact@mowtiie.cc |
-| **Member** | [Tutsy](https://github.com/Tutsy) | markkerwinballelos@gmail.com |
-| **Member** | [villalobosjames30](https://github.com/villalobosjames30) | villalobosjamescarl30@gmail.com |
-| **Member** | [Adrienne20894](https://github.com/Adrienne20894) | jaloconadrienne@gmail.com |
-
-### Instructor
-
-| Role | GitHub | Email |
-| :--- | :--- | :--- |
-| **Professor** | [ErvinAbiadSTI](https://github.com/ErvinAbiadSTI) | ervin.abiad@gmail.com |
+| Role | GitHub |
+| :--- | :--- |
+| **Leader** | [mowtiie](https://github.com/mowtiie) |
+| **Member** | [Tutsy](https://github.com/Tutsy) |
+| **Member** | [villalobosjames30](https://github.com/villalobosjames30) |
+| **Member** | [Adrienne20894](https://github.com/Adrienne20894) |
 
 ---
 
@@ -84,12 +78,7 @@ A few things worth knowing:
 * Microsoft SQL Server
 * Git and GitHub
 * Visual Studio and SQL Server Management Studio (SSMS)
-
-NuGet packages (installed automatically):
-
-* `Microsoft.Data.SqlClient`: connects the app to SQL Server.
-* `System.Configuration.ConfigurationManager`: reads the connection string from the config file.
-* `BCrypt.Net-Next`: hashes passwords.
+* `Microsoft.Data.SqlClient` for database access and `BCrypt.Net-Next` for password hashing
 
 ---
 
@@ -101,7 +90,7 @@ NuGet packages (installed automatically):
 * **.NET 8 SDK**
 * **A SQL Server to hold the database.** Pick one:
   * **LocalDB** is the easiest. It comes with the Data storage and processing workload.
-  * **A full SQL Server instance** (Express or Developer edition) also works. See [Using SSMS or a full SQL Server](#using-ssms-or-a-full-sql-server).
+  * **A full SQL Server instance** (Express or Developer edition) also works. See [Using SSMS or SQL Server Express](#using-ssms-or-sql-server-express).
 
 ### Steps
 
@@ -119,71 +108,33 @@ NuGet packages (installed automatically):
     * `LocalDb` uses `(localdb)\MSSQLLocalDB`. This is the default.
     * `SqlExpress` uses `.\SQLEXPRESS`.
 
-    To switch, see [Switching between LocalDB and SQL Server](#switching-between-localdb-and-sql-server).
+    To switch, see [Using SSMS or SQL Server Express](#using-ssms-or-sql-server-express).
 5.  **Run the app:** Set `Saleling.UI` as the startup project and press F5.
 
-### Using SSMS or a full SQL Server
+### Using SSMS or SQL Server Express
 
-SSMS is just a tool for looking at a database. It does not replace LocalDB, but it can connect to it.
+SSMS is a tool for looking at a database. To browse the LocalDB database, connect to server `(localdb)\MSSQLLocalDB` with Windows Authentication and expand **Databases** to find `Saleling.DB`.
 
-**Option A: Keep LocalDB and open it in SSMS**
+To use SQL Server Express instead of LocalDB:
 
-1. Open SSMS.
-2. For **Server name**, enter `(localdb)\MSSQLLocalDB`.
-3. For **Authentication**, choose Windows Authentication and click **Connect**.
-4. Expand **Databases** to find `Saleling.DB`. It is the same database the app uses.
+1. Install SQL Server Express (or Developer) and SSMS, and check that you can connect to it in SSMS (for example `.\SQLEXPRESS`).
+2. Publish `Saleling.DB` to that instance (step 3 above). Keep the database name `Saleling.DB`.
+3. Switch the app to the `SqlExpress` profile, then restart Visual Studio (it only reads environment variables when it starts):
+   ```powershell
+   setx SALELING_DB_PROFILE SqlExpress     # use SQL Server Express
+   setx SALELING_DB_PROFILE LocalDb        # go back to LocalDB
+   ```
+4. Run the app. Open the same instance in SSMS to watch the data change.
 
-**Option B: Use a full SQL Server instead of LocalDB**
+Good to know:
 
-1. Install SQL Server (Express or Developer) and SSMS. Note the instance name, for example `localhost\SQLEXPRESS`.
-2. Connect to that instance in SSMS to make sure it works.
-3. In Visual Studio, publish `Saleling.DB` to that instance (step 3 above). Keep the database name `Saleling.DB`.
-4. Switch the app to the `SqlExpress` profile (see the next section).
-5. Run the app. Open the same instance in SSMS to see the data change as you use it.
-
-If your instance has a different name than `SQLEXPRESS`, edit the `SqlExpress` entry in `Saleling.UI/App.config`. If you log in with a SQL username instead of Windows, replace `Integrated Security=True` with `User ID=yourname;Password=yourpassword`. Keep `TrustServerCertificate=True` for a local SQL Server, or the app may fail with a certificate error.
-
-### Switching between LocalDB and SQL Server
-
-The app picks its database in this order, and the first one that is set wins:
-
-1. `SALELING_CONNECTION_STRING`: a full connection string, for special cases such as another machine.
-2. `SALELING_DB_PROFILE`: the name of a profile, `LocalDb` or `SqlExpress`.
-3. `DatabaseProfile` in `Saleling.UI/App.config`, which is `LocalDb` by default.
-
-The easiest way to switch is the environment variable. It stays on your computer, so you never commit it and your teammates are not affected:
-
-```powershell
-setx SALELING_DB_PROFILE SqlExpress     # use SQL Server Express
-setx SALELING_DB_PROFILE LocalDb        # go back to LocalDB
-```
-
-Restart Visual Studio after running `setx`, because it only reads environment variables when it starts. To stop using the variable, so the app falls back to `App.config`, run `setx SALELING_DB_PROFILE ""`. A blank value counts as not set.
-
-If you type a profile name that does not exist, the app shows an error that lists the valid names.
-
-Each server has its own copy of `Saleling.DB`. When you switch, publish the database to the new server first (step 3).
+* The app picks its database in this order: the `SALELING_CONNECTION_STRING` environment variable (a full connection string), then `SALELING_DB_PROFILE` (`LocalDb` or `SqlExpress`), then `DatabaseProfile` in `Saleling.UI/App.config` (`LocalDb` by default). A blank value counts as not set, and an unknown profile name shows an error that lists the valid ones.
+* If your instance is not called `SQLEXPRESS`, edit the `SqlExpress` entry in `App.config`. For a SQL login instead of Windows, replace `Integrated Security=True` with `User ID=yourname;Password=yourpassword`. Keep `TrustServerCertificate=True` for a local server, or you may get a certificate error.
+* Each server has its own copy of `Saleling.DB`, so publish the database to a server before switching to it.
 
 ### Building the .exe
 
-Run this from the project folder:
-
-```powershell
-.\build-package.ps1
-```
-
-It builds everything from scratch and creates `publish\Saleling-v<version>.zip` (the `publish` folder is not committed to Git). The zip contains:
-
-* `Saleling.UI.exe`, a single exe that runs without installing .NET.
-* `Saleling.UI.dll.config`, the database settings. Keep it next to the exe.
-* `Database\Saleling.DB.dacpac`, the database.
-* `SETUP.txt`, step-by-step instructions for whoever installs it.
-
-On the other computer, deploy the database from SSMS (right-click **Databases**, then **Deploy Data-tier Application**), set `DatabaseProfile` in the config file, and run the exe. The database is not inside the exe, so that computer still needs its own SQL Server.
-
-The script needs the .NET 8 SDK and Visual Studio (with the Data storage and processing workload).
-
-The app version is set in `Saleling.UI/Saleling.UI.csproj` (`<Version>`). It shows on the login screen and in the zip's file name.
+See [docs/BUILDING.md](docs/BUILDING.md) to build `Saleling.UI.exe` and a zip you can share.
 
 ### Running the tests
 
