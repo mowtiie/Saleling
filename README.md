@@ -21,6 +21,30 @@ This system provides all the essential functionalities needed for retail operati
 
 ---
 
+## 📸 Screenshots
+
+### Login
+
+![Login](docs/screenshots/login.png)
+
+### Admin
+
+| Dashboard | Product Maintenance |
+| :---: | :---: |
+| ![Admin Dashboard](docs/screenshots/admin-dashboard.png) | ![Product Maintenance](docs/screenshots/product-maintenance.png) |
+
+| Inventory Management | Reports |
+| :---: | :---: |
+| ![Inventory Management](docs/screenshots/inventory-management.png) | ![Reports](docs/screenshots/reports.png) |
+
+### Cashier
+
+| Dashboard | Point of Sale |
+| :---: | :---: |
+| ![Cashier Dashboard](docs/screenshots/cashier-dashboard.png) | ![Point of Sale](docs/screenshots/point-of-sale.png) |
+
+---
+
 ## 🛠️ Technical Implementation
 
 ### Architecture: UI-Model-Controller-Repository (UMCR)
