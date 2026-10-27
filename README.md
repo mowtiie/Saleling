@@ -1,27 +1,23 @@
-# 👚 Saleling: Sales & Inventory Management System
+# Saleling: Sales & Inventory Management System
 
-**Saleling** is a comprehensive **Point-of-Sale (POS) and Inventory Management System** specifically designed for a **clothing apparel business**. Developed as a **Windows Forms application**, it utilizes an **event-driven** approach and strictly adheres to the **UI-Model-Controller-Repository (UMCR)** architectural pattern to ensure scalability, maintainability, and a clear separation of concerns.
-
----
-
-## ✨ Core Features
-
-This system provides all the essential functionalities needed for retail operations, with robust technical and data-integrity features.
-
-### Business Functionalities
-
-| Feature Area | Description | Requirement |
-| :--- | :--- | :--- |
-| **User & Access** | Secure Login with role-based access | Login, User Role Management |
-| **Dashboards** | Dedicated **Admin Dashboard** for high-level oversight and a streamlined **Cashier Dashboard** for sales operations. | Admin Dashboard, Cashier Dashboard |
-| **Product Management** | Complete **Product Maintenance (CRUD)** functionality, seeded with **100 sample products** (about 5 variants each). Products can be searched efficiently by **name, category, SKU or supplier**. | Product Maintenance, Product Search |
-| **Inventory Control** | Real-time tracking of the **Number of Inventory Items**. Automated **Stock Level Alerts** notify staff when apparel stock is low. | Inventory Items, Stock Level Alerts |
-| **Sales & Transactions** | Core **Cashiering/Sales** module. Every transaction is saved to the **Transaction History** for auditing. | Cashiering/Sales, Transaction History |
-| **Reporting** | Generation of detailed **Inventory and Sales Reports** based on collected sales and stock data. | Inventory & Sales Report |
+**Saleling** is a point-of-sale and inventory system for a clothing store. It is a Windows Forms desktop app built with C# and .NET 8, and it keeps its data in Microsoft SQL Server.
 
 ---
 
-## 📸 Screenshots
+## Features
+
+| Area | What it does |
+| :--- | :--- |
+| **Login and roles** | Users log in as either an Admin or a Cashier, and each role only sees what it needs. |
+| **Dashboards** | Admins get an overview of the store. Cashiers get a simple screen for making sales. |
+| **Products** | Add, edit and remove products. Search by name, category, SKU or supplier. Comes with 100 sample products. |
+| **Inventory** | Track how many items are in stock. Low-stock alerts warn staff when apparel is running out. |
+| **Sales** | Cashiers ring up sales, and every sale is saved to the transaction history. |
+| **Reports** | Inventory and sales reports built from the saved data. |
+
+---
+
+## Screenshots
 
 ### Login
 
@@ -45,119 +41,126 @@ This system provides all the essential functionalities needed for retail operati
 
 ---
 
-## 🛠️ Technical Implementation
+## How It Is Built
 
-### Architecture: UI-Model-Controller-Repository (UMCR)
+The code is split into four layers, so each part has one job:
 
-The project separates concerns across four distinct layers:
+* **UI:** The Windows Forms screens the user sees.
+* **Model:** Simple classes that describe the data, such as products, users and sales.
+* **Controller:** The business rules. It takes requests from the UI and asks the Repository for data.
+* **Repository:** Reads from and writes to the database.
 
-* **UI (User Interface):** Built with **Windows Forms** to display data and handle all **event-driven programming** interactions.
-* **Model:** Simple C\# objects that define the data structure (e.g., `ProductModel`, `ProductVariantModel`, `UserModel`, `SalesTransactionModel`).
-* **Controller:** Contains the application's **business logic**. It receives input from the UI and coordinates data flow with the Repository.
-* **Repository:** Manages all **data access** operations (CRUD) against the database, abstracting the data source from the Controller.
+A few things worth knowing:
 
-### Code & Security Principles
-
-* **Secure Password Hashing:** User passwords are secured using the **BCrypt algorithm**, providing strong, slow hashing to protect against brute-force attacks.
-* **Role-Based Authorization:** The controllers enforce roles themselves, not just the UI. Only **Admins** can maintain products, adjust inventory, list cashiers and see store-wide sales, and only **Cashiers** can process sales. Cashiers can only view their own sales data. Roles are also constrained in the database (`Admin` or `Cashier`), and stock can never go below zero.
-* **Error Management:** Extensive use of **`try-catch` / `throw exception`** throughout the application to handle and log errors gracefully, especially in data access and critical business logic.
-* **Data Structures:** **C\# Collections** (e.g., `List<T>`) are used to efficiently store and manage groups of related objects, like the product catalog or items in a shopping cart.
-
-### Data Integrity & Database Features
-
-* **Transaction Management:** Implementation of **Database Transact / Rollback** logic ensures data integrity during multi-step operations (e.g., if inventory update fails, the sale record rolls back).
-* **Performance:** Utilizes **Stored Procedure** for complex or frequently executed queries.
-* **Reporting Queries:** Sales and inventory reports and KPIs are produced by dedicated stored procedures (e.g., `sp_GenerateSalesReport`, `sp_GetInventoryStockKPIs`), keeping aggregation logic in the database.
-
-### Configuration & Logging
-
-* **Configuration File:** An external configuration file holds the **database connection string** and other application settings, allowing for easy updates without code changes.
-* **Log File:** All application events, errors, and critical transaction details are saved to the file named **`Saleling-Debug.logs`**. This file can be found in the application's runtime directory: `\bin\Debug\net8.0-windows`.
+* **Passwords are hashed** with BCrypt, so they are never stored as plain text.
+* **Roles are enforced in the code, not just the screens.** Only Admins can manage products, adjust inventory and see store-wide sales. Only Cashiers can make sales, and they can only see their own. Stock can never go below zero.
+* **Sales are all-or-nothing.** If updating the stock fails, the sale is cancelled too.
+* **Reports come from stored procedures** in the database.
+* **Settings live in a config file.** The database connection string is in `Saleling.UI/App.config`.
+* **Errors are logged** to `Saleling-Debug.logs` in the app's folder (`bin\Debug\net8.0-windows`).
 
 ---
 
-## 👥 Team / Collaborators
+## Team
 
-This project was developed by the following students:
-
-| Role | Github | Email |
+| Role | GitHub | Email |
 | :--- | :--- | :--- |
 | **Leader** | [mowtiie](https://github.com/mowtiie) | contact@mowtiie.cc |
 | **Member** | [Tutsy](https://github.com/Tutsy) | markkerwinballelos@gmail.com |
 | **Member** | [villalobosjames30](https://github.com/villalobosjames30) | villalobosjamescarl30@gmail.com |
 | **Member** | [Adrienne20894](https://github.com/Adrienne20894) | jaloconadrienne@gmail.com |
 
----
+### Instructor
 
-## 🎓 Instructor / Professor
-
-| Role | Github | Email |
+| Role | GitHub | Email |
 | :--- | :--- | :--- |
 | **Professor** | [ErvinAbiadSTI](https://github.com/ErvinAbiadSTI) | ervin.abiad@gmail.com |
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-* **Programming Language:** C# (.NET 8, Windows Forms)
-* **Database:** Microsoft SQL Server
-* **Version Control:** Git & Github
-* **IDE:** Microsoft Visual Studio & SQL Server Management Studio
+* C# (.NET 8, Windows Forms)
+* Microsoft SQL Server
+* Git and GitHub
+* Visual Studio and SQL Server Management Studio (SSMS)
 
----
+NuGet packages (installed automatically):
 
-## 📦 Required NuGet Packages
-
-The following packages are referenced by the projects (restored automatically by NuGet) to handle configuration, database access, and password hashing:
-
-* **`System.Configuration.ConfigurationManager` (9.0.8, `Saleling.Util`):** Used to read the database connection string and application settings from the configuration file.
-* **`Microsoft.Data.SqlClient` (5.2.2, `Saleling.Repository`):** The primary provider for connecting to and interacting with the Microsoft SQL Server database.
-* **`BCrypt.Net-Next` (4.0.3, `Saleling.Util`):** Provides the implementation of the **BCrypt hashing algorithm** for securing user passwords.
+* `Microsoft.Data.SqlClient`: connects the app to SQL Server.
+* `System.Configuration.ConfigurationManager`: reads the connection string from the config file.
+* `BCrypt.Net-Next`: hashes passwords.
 
 ---
 
-## 🚀 Setup & Execution
+## Getting Started
 
-### Prerequisites
+### What you need
 
-* **Visual Studio 2022** with the **.NET desktop development** and **Data storage and processing** (SQL Server Data Tools) workloads. The `Saleling.DB` project is an SSDT project, so `dotnet build` cannot build or publish it.
+* **Visual Studio 2022** with the **.NET desktop development** and **Data storage and processing** workloads. The `Saleling.DB` project needs the second one, and `dotnet build` cannot build it.
 * **.NET 8 SDK**
-* **SQL Server LocalDB** (installed with the Data storage and processing workload)
+* **A SQL Server to hold the database.** Pick one:
+  * **LocalDB** is the easiest. It comes with the Data storage and processing workload.
+  * **A full SQL Server instance** (Express or Developer edition) also works. See [Using SSMS or a full SQL Server](#using-ssms-or-a-full-sql-server).
 
 ### Steps
 
-1.  **Clone the Repository:**
+1.  **Download the project:**
     ```bash
     git clone https://github.com/mowtiie/Saleling
     ```
-2.  **Open the Solution:** Open `Saleling.sln` in Visual Studio.
-3.  **Publish the Database:**
+2.  **Open the solution:** Open `Saleling.sln` in Visual Studio.
+3.  **Create the database:**
     * Right-click the `Saleling.DB` project and choose **Publish**.
-    * Set the target database connection to server `(localdb)\MSSQLLocalDB` and the **database name to `Saleling.DB`** (the application connects to this exact name).
-    * Click **Publish**. This creates the schema and runs the seed script (users, categories, suppliers, a walk-in customer, and 100 sample products).
-    * The seed script skips any data that already exists, so re-publishing is safe.
-4.  **Check the Connection String:** The application is configured to use the following connection string for local development in `Saleling.UI/App.config`:
+    * Set the target server to `(localdb)\MSSQLLocalDB` (or your own SQL Server) and the database name to **`Saleling.DB`**. The app expects this exact name.
+    * Click **Publish**. This creates the tables and adds the starting data: users, categories, suppliers, a walk-in customer and 100 sample products.
+    * Publishing again is safe. Existing data is not duplicated.
+4.  **Check the connection string** in `Saleling.UI/App.config`. By default it is:
     ```
     Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Saleling.DB;Integrated Security=True
     ```
-    Change it if your SQL Server instance or database name is different. To override it without editing files (for example on another machine), set the `SALELING_CONNECTION_STRING` environment variable; it takes priority over `App.config`.
-5.  **Run the Project:** Set `Saleling.UI` as the startup project, then build and run the application (F5).
+    If you use a different server, change it here. You can also set the `SALELING_CONNECTION_STRING` environment variable instead of editing the file. It takes priority over `App.config`.
+5.  **Run the app:** Set `Saleling.UI` as the startup project and press F5.
 
-### Running the Tests
+### Using SSMS or a full SQL Server
+
+SSMS is just a tool for looking at a database. It does not replace LocalDB, but it can connect to it.
+
+**Option A: Keep LocalDB and open it in SSMS**
+
+1. Open SSMS.
+2. For **Server name**, enter `(localdb)\MSSQLLocalDB`.
+3. For **Authentication**, choose Windows Authentication and click **Connect**.
+4. Expand **Databases** to find `Saleling.DB`. It is the same database the app uses.
+
+**Option B: Use a full SQL Server instead of LocalDB**
+
+1. Install SQL Server (Express or Developer) and SSMS. Note the instance name, for example `localhost\SQLEXPRESS`.
+2. Connect to that instance in SSMS to make sure it works.
+3. In Visual Studio, publish `Saleling.DB` to that instance (step 3 above). Keep the database name `Saleling.DB`.
+4. Tell the app where the database is, either by editing `Saleling.UI/App.config` or by setting the environment variable (then restart Visual Studio):
+   ```powershell
+   setx SALELING_CONNECTION_STRING "Data Source=localhost\SQLEXPRESS;Initial Catalog=Saleling.DB;Integrated Security=True;TrustServerCertificate=True"
+   ```
+5. Run the app. Open the same instance in SSMS to see the data change as you use it.
+
+> **Tip:** Keep `TrustServerCertificate=True` in the connection string for a local SQL Server. Without it, the app may fail with a certificate error. If you log in with a SQL username instead of Windows, replace `Integrated Security=True` with `User ID=yourname;Password=yourpassword`.
+
+### Running the tests
 
 ```bash
 dotnet test Saleling.Controller.Tests
 ```
 
-Most tests need no database. The integration tests create a throwaway database on your `(localdb)\MSSQLLocalDB` instance from the `Saleling.DB` scripts and drop it afterwards, so they never touch your real `Saleling.DB` data. If LocalDB is not available they are skipped, not failed. The tests always use the LocalDB connection string in the test project, even if `SALELING_CONNECTION_STRING` is set.
+Most tests do not need a database. The database tests build a temporary copy of the database on LocalDB (`(localdb)\MSSQLLocalDB`) and delete it afterwards, so your real `Saleling.DB` data is never touched. If LocalDB is not installed, those tests are skipped instead of failing. They always use LocalDB, even if `SALELING_CONNECTION_STRING` is set.
 
-The same tests run on every push and pull request through GitHub Actions (`.github/workflows/ci.yml`). The workflow builds the C# projects individually, because `Saleling.DB` is an SSDT project that `dotnet` cannot build.
+The same tests run automatically on GitHub for every push and pull request (see `.github/workflows/ci.yml`).
 
-### Default Login Credentials (Demo Only)
+---
 
-> **Warning:** These accounts are seeded by `PostDeployment.sql` for demonstration and grading purposes only. Their passwords are published in this README and the application does not force a password change, so **never deploy with these accounts**. Before any real use, delete them or change their passwords.
+## Default Logins (Demo Only)
 
-*Note: Passwords are BCrypt-hashed in the database. These are the plaintext values for login.*
+> **Warning:** These accounts are created for demonstration and grading only. Their passwords are public in this README. Never use them in a real deployment. Delete them or change their passwords first.
 
 | Role | Username | Password |
 | :--- | :--- | :--- |
