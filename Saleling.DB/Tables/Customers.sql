@@ -6,9 +6,10 @@
     Email VARCHAR(100),
     LoyaltyPoints INT DEFAULT 0
 );
+GO
 
--- A plain UNIQUE constraint allows only one NULL, so only one customer could ever lack a phone
--- or email. These indexes enforce uniqueness only for customers who actually have a value.
 CREATE UNIQUE NONCLUSTERED INDEX UX_Customers_Phone ON Customers (Phone) WHERE Phone IS NOT NULL;
+GO
 
-CREATE UNIQUE NONCLUSTERED INDEX UX_Customers_Email ON Customers (Email) WHERE Email IS NOT NULL;
+CREATE UNIQUE NONCLUSTERED INDEX UX_Customers_Email ON Customers (Email) WHERE Email IS NOT NULL;
+GO
