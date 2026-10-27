@@ -164,6 +164,40 @@ If you type a profile name that does not exist, the app shows an error that list
 
 Each server has its own copy of `Saleling.DB`. When you switch, publish the database to the new server first (step 3).
 
+### Building the .exe
+
+Run this from the project folder:
+
+```powershell
+.\build-package.ps1
+```
+
+It builds everything from scratch and creates `publish\Saleling-v<version>.zip` (the `publish` folder is not committed to Git). The zip contains:
+
+* `Saleling.UI.exe`, a single exe that runs without installing .NET.
+* `Saleling.UI.dll.config`, the database settings. Keep it next to the exe.
+* `Database\Saleling.DB.dacpac`, the database.
+* `SETUP.txt`, step-by-step instructions for whoever installs it.
+
+On the other computer, deploy the database from SSMS (right-click **Databases**, then **Deploy Data-tier Application**), set `DatabaseProfile` in the config file, and run the exe. The database is not inside the exe, so that computer still needs its own SQL Server.
+
+The script needs the .NET 8 SDK and Visual Studio (with the Data storage and processing workload).
+
+### Versions and releases
+
+The app version is set in one place: `<Version>` in `Saleling.UI/Saleling.UI.csproj`. It appears on the login screen, in the exe's file properties, and in the name of the zip.
+
+To make a release:
+
+1. Change `<Version>` (for example `1.0.0` to `1.0.1`). Use `1.0.1` for fixes, `1.1.0` for new features and `2.0.0` for big changes. If the database changed, say so in the release notes.
+2. Commit, then run `.\build-package.ps1`.
+3. Tag the release and push the tag:
+   ```bash
+   git tag v1.0.1
+   git push origin v1.0.1
+   ```
+4. On GitHub, create a **Release** from that tag and attach the zip.
+
 ### Running the tests
 
 ```bash

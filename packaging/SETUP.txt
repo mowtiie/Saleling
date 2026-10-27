@@ -1,0 +1,33 @@
+SALELING - SETUP
+================
+
+You need
+  * Windows 10 or 11 (64-bit)
+  * Microsoft SQL Server (Express is fine) and SQL Server Management Studio (SSMS)
+  * Nothing else. .NET is already included in Saleling.UI.exe.
+
+1. Create the database
+  a. Open SSMS and connect to your SQL Server (for example .\SQLEXPRESS).
+     If you get a certificate error, tick "Trust server certificate".
+  b. Right-click "Databases" and choose "Deploy Data-tier Application...".
+  c. Pick Database\Saleling.DB.dacpac and click Next.
+  d. Keep the database name as Saleling.DB, then finish the wizard.
+  This creates the tables and the starting data (users, categories, suppliers, 100 sample products).
+
+2. Point the app at your SQL Server
+  a. Open Saleling.UI.dll.config in Notepad (keep it next to Saleling.UI.exe).
+  b. Set DatabaseProfile to SqlExpress (or LocalDb).
+  c. If your server is not .\SQLEXPRESS, edit the matching connection string
+     (the "Data Source=" part).
+
+3. Run Saleling.UI.exe
+
+Demo logins (change or delete these before real use)
+  Admin    sysadmin   footpath1dangeravenge2
+  Cashier  johndoe    buggysnow1fieldapproach2
+  Cashier  janedoe    brown1nosemule2
+
+Troubleshooting
+  * "Cannot open database" or login errors: check the server name in the config and
+    that the SQL Server service is running.
+  * Certificate error: keep TrustServerCertificate=True in the connection string.

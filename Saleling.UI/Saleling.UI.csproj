@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- The app version. Shown on the login screen and in the exe's file properties. -->
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

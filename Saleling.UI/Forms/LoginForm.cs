@@ -1,6 +1,7 @@
 using Saleling.Controller;
 using Saleling.Model;
 using Saleling.Util;
+using System.Reflection;
 
 namespace Saleling.UI
 {
@@ -15,12 +16,36 @@ namespace Saleling.UI
         {
             InitializeComponent();
             _userRepository = new UserController();
+            ShowVersion();
 
             MouseMove += ResetInactivityTimer;
             KeyDown += ResetInactivityTimer;
             txtUsername.KeyDown += ResetInactivityTimer;
             txtPassword.KeyDown += ResetInactivityTimer;
             cbShowPassword.Click += ResetInactivityTimer;
+        }
+
+        // The version comes from <Version> in Saleling.UI.csproj. The SDK appends "+<commit>" to it, which is dropped here.
+        public static string GetVersion()
+        {
+            string? version = Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            return version?.Split('+')[0] ?? "unknown";
+        }
+
+        private void ShowVersion()
+        {
+            Label lblVersion = new Label
+            {
+                Text = $"Version {GetVersion()}",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Size = new Size(panel1.Width, 28),
+                Location = new Point(0, panel1.Height - 40),
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+            };
+            panel1.Controls.Add(lblVersion);
         }
 
         private void pbClose_Click(object sender, EventArgs e)
